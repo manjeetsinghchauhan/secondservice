@@ -1,7 +1,7 @@
 /**
  * Filename: mediaModel.ts
  * Purpose: Define Schema for Attribute Library
- * Owner: Homeservice
+ * Owner: Secondservice
  * Maintainer: dothesmart
  */
 

@@ -71,7 +71,7 @@ switch (ENVIRONMENT) {
 }
 
 export const SERVER = Object.freeze({
-	APP_NAME: "HomeService",
+	APP_NAME: "SecondService",
 	APP_LOGO: "https://appinventiv-development.s3.amazonaws.com/1607946234266_Sqlv5.svg",
 	TEMPLATE_PATH: process.cwd() + "/src/views/",
 	UPLOAD_DIR: process.cwd() + "/src/uploads/",

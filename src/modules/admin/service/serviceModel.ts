@@ -1,7 +1,7 @@
 /**
  * Filename: serviceModel.ts
  * Purpose: Define Schema for services
- * Owner: Homeservice
+ * Owner: Secondservice
  * Maintainer: dothesmart
  */
 
