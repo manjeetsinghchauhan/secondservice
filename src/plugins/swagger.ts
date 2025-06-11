@@ -12,8 +12,8 @@ export const plugin = {
 	register: async function (server) {
 		const swaggerOptions = {
 			info: {
-				title: "Home Service API Documentation",
-				description: "Home Service",
+				title: "Second Service API Documentation",
+				description: "Second Service",
 				 contact: {
 				 	name: "Manjeet Chauhan",
 				 	email: "manjeet.perfect@gmail.com"

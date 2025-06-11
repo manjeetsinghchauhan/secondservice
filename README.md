@@ -25,7 +25,7 @@ TAG="local"
 NODE_ENV="local"
 
 # Mongo DB Credentials mongodb://localhost:27017/
-    DB_NAME="homeservice"
+    DB_NAME="secondservice"
     DB_URL="mongodb://localhost:27017/"
     DB_USER=""
     DB_PASSWORD=""

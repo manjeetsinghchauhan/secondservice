@@ -16,7 +16,7 @@ export const addSchema = Joi.object({
         state: Joi.number().example("15"),
         country: Joi.number().example("11"),
     },
-    notes: Joi.string().trim().example("Please carry your Home Service Id"),
+    notes: Joi.string().trim().example("Please carry your Second Service Id"),
     status: Joi.string().trim().required().valid(APPOINTMENT_STATUS.PENDING)  
 })
 
@@ -32,7 +32,7 @@ export const editSchema = Joi.object({
     appointmentId: Joi.string().trim().regex(REGEX.MONGO_ID).required(),
     appointmentDate: Joi.date().example("dd/mm/yyyy"),
     appointmentSlot: Joi.string().trim().example("09:30 AM"),
-    notes: Joi.string().trim().example("Please carry your Home Service Id"),  
+    notes: Joi.string().trim().example("Please carry your Second Service Id"),  
 })
 
 export const cancelSchema = Joi.object({
