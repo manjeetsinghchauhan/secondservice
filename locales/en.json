@@ -158,5 +158,8 @@
 	"SERVICE_ALREADY_EXISTS": "Service already exists",
 	"SERVICE_NOT_FOUND": "Service not found",
 	"SERVICE_UPDATED_SUCCESSFULLY": "Service updated successfully",
-	"DELETE_SERVICE": "Service deleted"
+	"DELETE_SERVICE": "Service deleted",
+	"GET_PINCODE": "Pincode List",
+	"UPDATE_PINCODE": "Pincode Updated",
+	"PINCODE_NOT_FOUND": "PINCODE_NOT_FOUND"
 }

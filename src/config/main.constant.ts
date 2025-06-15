@@ -64,7 +64,8 @@ const DB_MODEL_REF = {
 	SERVICE: "services",
 	MEDIA: "medias",
 	BRAND: "brands",
-	ATTRIBUTE: "attributes"
+	ATTRIBUTE: "attributes",
+	PINCODE: "pincodes",
 };
 
 const DEVICE_TYPE = {
@@ -252,7 +253,7 @@ const FIREBASE_TOKEN = {
 const REGEX = {
 	EMAIL: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
 	SSN: /^(?!219-09-9999|078-05-1120)(?!666|000|9\d{2})\d{3}-(?!00)\d{2}-(?!0{4})\d{4}$/, // US SSN
-	ZIP_CODE: /^\d{5}(-\d{4})?$/,
+	ZIP_CODE: /^\d{6}$/,
 	PASSWORD: /^[A-Za-z][A-Za-z\d@#$%^&+]{7,15}$/, // password is between 8 and 16 characters long and includes at least one uppercase letter, one lowercase letter, one digit, and one special character
 	PASSWORD_V2: /^(?=[^A-Z]*[A-Z])(?=[^a-z]*[a-z])(?=(.*[\d@#$%^&+=])).{8,16}$/, // checks for at least one uppercase letter, at least one lowercase letter, and then either at least one digit or one special character
 	PASSWORD_V3: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{}[\]\\|;:'",.<>?/])(?!.*[a-z]).{8,16}$/, // checks for atleast one uppercase, one special & one number
