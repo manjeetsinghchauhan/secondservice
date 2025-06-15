@@ -9,4 +9,5 @@ export { services } from "./admin/service/serviceModel";
 export { medias } from "./admin/media/mediaModel";
 export { brands } from "./admin/brand/brandModel";
 export { attributes } from "./admin/attribute/attributeModel";
+export { pincodes } from "./admin/pincode/pincodeModel";
 

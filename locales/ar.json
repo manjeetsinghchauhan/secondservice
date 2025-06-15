@@ -33,5 +33,7 @@
 	"SERVICE_ALREADY_EXISTS": "الخدمة موجودة بالفعل",
 	"SERVICE_NOT_FOUND": "لم يتم العثور على الخدمة",
 	"SERVICE_UPDATED_SUCCESSFULLY": "تم تحديث الخدمة بنجاح",
-	"DELETE_SERVICE": "تم حذف الخدمة"
+	"DELETE_SERVICE": "تم حذف الخدمة",
+	"GET_PINCODE": "قائمة الرموز البريدية",
+	"UPDATE_PINCODE": "تم تحديث الرمز البريدي"
 }

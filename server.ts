@@ -29,7 +29,7 @@ import { bootstrap } from "@utils/BootStrap";
     }
     public template () {
       console.log("");
-      console.log(`****************************** ${SERVER.APP_NAME} ********************************`);
+      console.log(`****************************** ${SERVER.APP_NAME} Starting ********************************`);
       console.log("");
       console.log("env : ", process.env.NODE_ENV.trim());
     }

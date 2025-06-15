@@ -12,6 +12,8 @@ import { brandsRoute } from "@modules/admin/brand";
 import { attributesRoute } from "@modules/admin/attribute";
 import { servicesRoute } from "@modules/admin/service";
 import { appServicesRoute } from "@modules/service";
+import { pincodesRoute } from "@modules/admin/pincode";
+
 
 export const routes: any = [
 	...userRouteV1,
@@ -22,5 +24,6 @@ export const routes: any = [
 	...brandsRoute,
 	...attributesRoute,
 	...servicesRoute,
-	...appServicesRoute
+	...appServicesRoute,
+	...pincodesRoute
 ];
