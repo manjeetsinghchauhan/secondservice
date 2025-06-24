@@ -4,36 +4,87 @@ import { internalServerSchema,
          tokenErrorSchema, 
          errorDataSchema,
          sucessDataSchema 
-        } from "@modules/service/swaggerRespnse";
+        } from "@modules/category/swaggerRespnse";
 import { failActionFunction } from "@utils/appUtils";
 import { responseHandler } from "@utils/ResponseHandler";
 import { authorizationHeaderObj } from "@utils/validator";
-import { serviceController } from ".";
-import { validateSearchingFiltering, validateServiceId } from "./routeValidater";
+import { categoryControllerV1 } from ".";
+import {  
+         listingSchema, 
+         validateSearchingFiltering,
+         validateCategoryId } from "./routeValidater";
 
-export const appServicesRoute = [
+export const appCategoriesRoute = [
   {
     method: "GET",
-    path: `${SERVER.API_BASE_URL}/services`,
+    path: `${SERVER.API_BASE_URL}/categories/club`,
     handler: async (request: any, h: ResponseToolkit) => {
       try {
-        const payload = request.query;
-        const headers = request.headers;
-        //const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await serviceController.getServices({...payload,...headers});
+        const query = request.query;
+        const tokenData: TokenData = request.auth?.credentials?.tokenData;
+        const result = await categoryControllerV1.getAllClubedCategories(query, tokenData);
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {
         return responseHandler.sendError(request, error);
       }
     },
     options: {
-      tags: ["api", "app services"],
-      description: "Get all services",
+      tags: ["api", "app categories"],
+      description: "Admin Club Categories",
       auth: {
         strategies: ["BasicAuth"]
       },
       validate: {
-        //headers: authorizationHeaderObj,
+        headers: authorizationHeaderObj,
+        query: listingSchema,
+        failAction: failActionFunction,
+      },
+      plugins: {
+        "hapi-swagger": {
+          responses: {
+            200: {
+              description: 'Success',
+              schema: sucessDataSchema
+            },
+            400: {
+              description: 'Bad Request',
+              schema: errorDataSchema
+            },
+            401: {
+              description: 'Unauthorized',
+              schema: tokenErrorSchema
+            },
+            500: {
+              description: 'Internal Server Error',
+              schema: internalServerSchema
+            }
+          }
+        },
+      }
+    }
+  },
+  {
+    method: "GET",
+    path: `${SERVER.API_BASE_URL}/categories`,
+    handler: async (request: any, h: ResponseToolkit) => {
+      try {
+        const payload = request.query;
+        const headers = request.headers;
+        const tokenData: TokenData = request.auth?.credentials?.tokenData;
+        const result = await categoryControllerV1.getAdminCategories({...payload,...headers});
+        return responseHandler.sendSuccess(request, h, result);
+      } catch (error) {
+        return responseHandler.sendError(request, error);
+      }
+    },
+    options: {
+      tags: ["api", "app categories"],
+      description: "Admin Get Categories",
+      auth: {
+        strategies: ["BasicAuth"]
+      },
+      validate: {
+        headers: authorizationHeaderObj,
         query: validateSearchingFiltering,
         failAction: failActionFunction,
         options: {
@@ -66,26 +117,26 @@ export const appServicesRoute = [
   },
   {
     method: "GET",
-    path: `${SERVER.API_BASE_URL}/service/{serviceId}`,
+    path: `${SERVER.API_BASE_URL}/categories/{categoryId}`,
     handler: async (request: any, h: ResponseToolkit) => {
       try {
-        let params = request.params;
+        let params: AdminCategoriesRequest = request.params;
         const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await serviceController.fetchService(params);
+        const result = await categoryControllerV1.fetchCategory(params);
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {
         return responseHandler.sendError(request,error);
       }
     },
     options: {
-      tags: ["api", "app services"],
-      description: "Fetch Service by Id",
+      tags: ["api", "app categories"],
+      description: "Admin Fetch Category",
       auth: {
-        strategies: ["UserAuth"]
+        strategies: ["BasicAuth"]
       },
       validate: {
         headers: authorizationHeaderObj,
-        params: validateServiceId,
+        params: validateCategoryId,
         failAction: failActionFunction,
         options: {
           abortEarly: false

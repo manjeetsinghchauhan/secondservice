@@ -614,5 +614,5 @@ export const userRoute = [
         },
       },
     },
-  },
+  }
 ];
