@@ -169,7 +169,7 @@ export const updateStatus=Joi.object({
       .email({ minDomainSegments: 2 })
       // .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
       .regex(REGEX.EMAIL)
-      .required().example("test@appinventiv.com"),
+      .required().example("test@gmail.com"),
     status: Joi.string().trim().required().valid(STATUS.BLOCKED, STATUS.UN_BLOCKED)
   })
 export const verifySignUp=Joi.object({

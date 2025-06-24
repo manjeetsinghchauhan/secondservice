@@ -3,7 +3,6 @@ import Joi from "joi";
 import { DEVICE_TYPE, LANGUAGE } from "@config/main.constant";
 
 const authorizationHeaderObj = Joi.object({
-	authorization: Joi.string().required().description("Bearer space accessToken : Bearer xyz..."),
 	platform: Joi.string()
 		.trim()
 		.required()

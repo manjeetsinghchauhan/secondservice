@@ -36,41 +36,35 @@ import { bootstrap } from "@utils/BootStrap";
     private async startserver() {
       this.server = Hapi.server({
         port: SERVER.PORT,
+        host: 'localhost',
         routes: {
-          cors: {
-            origin: ["*"],
-            headers: [
-              "Accept",
-              "api_key",
-              "authorization",
-              "Content-Type",
-              "If-None-Match",
-              "platform",
-              "timezone",
-              "offset",
-              "accept-language",
-              "access-control-allow-origin",
-            ],
-            additionalHeaders: [
-              "Accept",
-              "api_key",
-              "authorization",
-              "Content-Type",
-              "If-None-Match",
-              "platform",
-              "timezone",
-              "offset",
-              "accept-language",
-              "access-control-allow-origin",
-            ], // sometime required
+            cors: {
+              origin: ['*'], // or your exact domain
+              headers: [
+                'Accept',
+                'Content-Type',
+                'Authorization',
+                'api_key',
+                'accept-language',
+                'platform',
+                'timezone',
+                'offset',
+              ],
+              additionalHeaders: [
+                'Accept',
+                'Content-Type',
+                'Authorization',
+                'api_key',
+                'accept-language',
+                'platform',
+                'timezone',
+                'offset',
+              ],
+              credentials: true, // if sending cookies or auth headers
+            },
           },
-          state: {
-            // to configure cookie behavior at a route-level
-            parse: true,
-            failAction: "error",
-          },
-        },
       });
+
       //swagger plugin
       await this.server.register(plugins);
       await this.server.start();
@@ -126,7 +120,27 @@ import { bootstrap } from "@utils/BootStrap";
       });
     };
     private async localRoutes() {
-      await this.server.route(routes)
+      await this.server.route({
+        method: 'OPTIONS',
+        path: '/{any*}',
+        options: {
+          auth: false,
+        },
+        handler: (request, h) => {
+          return h
+            .response()
+            .code(204)
+            .header('Access-Control-Allow-Origin', request.headers.origin || '*')
+            .header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            .header(
+              'Access-Control-Allow-Headers',
+              'Accept, Content-Type, Authorization, api_key, accept-language, platform, timezone, offset'
+            )
+            .header('Access-Control-Allow-Credentials', 'true');
+        },
+      });
+
+      await this.server.route(routes);
     }
     private callback = () => {
       logger.info(` Hapi server swagger is running this URL :- ${SERVER.APP_URL}/${SERVER.MICROSERVICE_URL}/documentation`);
