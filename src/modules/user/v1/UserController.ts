@@ -827,9 +827,13 @@ export class UserController {
   async verifySignUp(params: UserRequest.verifySignUp) {
     try {
       let tempUserExists : any = await baseDao.findOne("pre_signup", {"_id": params.userId})
-      if(!tempUserExists || params.otp !== tempUserExists.otp ){
+      if(!tempUserExists ){
         return Promise.reject(userConstant.MESSAGES.ERROR.OTP_EXPIRED);
-      }else{
+      }
+      else if(params.otp !== tempUserExists.otp){
+        return Promise.reject(userConstant.MESSAGES.ERROR.INVALID_OTP);
+      }
+      else{
         let userData = {
           "firstName":tempUserExists.firstName,
           "lastName":tempUserExists.lastName,

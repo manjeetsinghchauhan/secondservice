@@ -85,7 +85,7 @@ class CustomLogger {
   public logger = winston.createLogger({
     levels: this.levels,
     transports: [
-      new winston.transports.Console(this.options.console),
+      new winston.transports.Console(this.options.console), 
       this.options.info,
       this.options.error,
       this.options.health,
