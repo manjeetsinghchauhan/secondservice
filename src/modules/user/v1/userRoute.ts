@@ -172,8 +172,7 @@ export const userRoute = [
       try {
         const headers = request.headers;
         const payload: UserRequest.Login = request.payload;
-        payload.remoteAddress =
-          request["headers"]["x-forwarded-for"] || request.info.remoteAddress;
+        payload.remoteAddress = request["headers"]["x-forwarded-for"] || request.info.remoteAddress;
         const result = await userControllerV1.login({ ...headers, ...payload });
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {

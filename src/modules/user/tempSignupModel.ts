@@ -89,7 +89,7 @@ preSignupSchema.index({ firstName: 1 });
 preSignupSchema.index({ lastName: 1 });
 preSignupSchema.index({ name: 1 });
 preSignupSchema.index({ email: 1 });
-preSignupSchema.index({ ttl: 1 }, { expireAfterSeconds: 120 });
+preSignupSchema.index({ ttl: 1 }, { expireAfterSeconds: 300 });
 
 // Export user
 export const pre_signup: Model<tempSignup> = model<tempSignup>(DB_MODEL_REF.PRESIGNUP, preSignupSchema);

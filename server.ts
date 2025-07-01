@@ -4,6 +4,17 @@ import Hapi from "@hapi/hapi";
 import Vision from "@hapi/vision";
 import { SERVER } from "@config/index";
 
+// Add uncaught exception handlers
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 // create folder for upload if not exist
 if (!fs.existsSync(SERVER.UPLOAD_DIR)) fs.mkdirSync(SERVER.UPLOAD_DIR);
 // create folder for logs if not exist
@@ -34,6 +45,9 @@ import { bootstrap } from "@utils/BootStrap";
       console.log("env : ", process.env.NODE_ENV.trim());
     }
     private async startserver() {
+      console.log("Starting server on port:", SERVER.PORT);
+      console.log("Server host:", 'localhost');
+      
       this.server = Hapi.server({
         port: SERVER.PORT,
         host: 'localhost',
@@ -58,7 +72,7 @@ import { bootstrap } from "@utils/BootStrap";
                 'accept-language',
                 'platform',
                 'timezone',
-                'offset',
+                'offset'
               ],
               credentials: true, // if sending cookies or auth headers
             },
@@ -66,13 +80,19 @@ import { bootstrap } from "@utils/BootStrap";
       });
 
       //swagger plugin
+      console.log("Registering plugins...");
       await this.server.register(plugins);
+      console.log("Starting server...");
       await this.server.start();
+      console.log("Server started successfully!");
       this.callback();
       //start package call
+      console.log("Initializing packages...");
       await this.start();
       //routes call
+      console.log("Registering routes...");
       this.localRoutes();
+      console.log("All routes registered successfully!");
       
     }
     private start = async () => {
@@ -134,7 +154,7 @@ import { bootstrap } from "@utils/BootStrap";
             .header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
             .header(
               'Access-Control-Allow-Headers',
-              'Accept, Content-Type, Authorization, api_key, accept-language, platform, timezone, offset'
+              'Accept, Content-Type, Authorization, api_key, accept-language, platform, timezone, offset, deviceId'
             )
             .header('Access-Control-Allow-Credentials', 'true');
         },
