@@ -1,5 +1,5 @@
 import { SERVER } from "@config/environment";
-import { LOGIN_TYPE, REGEX, STATUS, VALIDATION_CRITERIA, VALIDATION_MESSAGE } from "@config/main.constant";
+import { DEVICE_TYPE, LOGIN_TYPE, REGEX, STATUS, VALIDATION_CRITERIA, VALIDATION_MESSAGE } from "@config/main.constant";
 import Joi from "joi";
 
 export const tempSignUp= Joi.object({

@@ -380,6 +380,7 @@ export const userRoute = [
     handler: async (request: any, h: ResponseToolkit) => {
       try {
         const tokenData: TokenData = request.auth?.credentials?.tokenData;
+        console.log("====Token Data=====", tokenData);
         const result = await userControllerV1.logout(tokenData);
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {

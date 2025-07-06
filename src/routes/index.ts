@@ -14,6 +14,7 @@ import { servicesRoute } from "@modules/admin/service";
 import { appServicesRoute } from "@modules/service";
 import { pincodesRoute } from "@modules/admin/pincode";
 import { appCategoriesRoute } from "@modules/category";
+import { adminRoute } from "@modules/admin/admin";
 
 
 export const routes: any = [
@@ -27,5 +28,6 @@ export const routes: any = [
 	...servicesRoute,
 	...appServicesRoute,
 	...pincodesRoute,
-	...appCategoriesRoute
+	...appCategoriesRoute,
+	...adminRoute
 ];
