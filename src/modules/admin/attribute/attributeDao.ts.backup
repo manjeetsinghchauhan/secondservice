@@ -32,8 +32,7 @@ export class AdminAttributeDao extends BaseDao {
             let aggPipe: any = []
             let match: any = {}
             let sort: any = {};
-            // Return both UN_BLOCKED and BLOCKED attributes, exclude DELETED
-            match.status = { '$in': [STATUS.UN_BLOCKED, STATUS.BLOCKED] };
+            match.status = STATUS.UN_BLOCKED;
 
             if (params.search) {
                 match.searchKeywords = { "$regex": params.search, "$options": "i" }
@@ -69,8 +68,7 @@ export class AdminAttributeDao extends BaseDao {
     async searchById(params) {
         let query: any = {};
         query._id = params.attributeId;
-        // Return both UN_BLOCKED and BLOCKED attributes, exclude DELETED
-        query.status = { '$in': [STATUS.UN_BLOCKED, STATUS.BLOCKED] };
+        query.status = { '$eq': STATUS.UN_BLOCKED };
         return await this.findOne(this.attributeDB, query, {}, {});
     }
 

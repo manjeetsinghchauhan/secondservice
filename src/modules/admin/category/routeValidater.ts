@@ -6,6 +6,7 @@ export const addSchema = Joi.object({
     title: Joi.string().trim().required().min(3)
     .max(100).description('title'),
     parentId:  Joi.string().trim().optional().allow('0'),
+    status: Joi.string().valid("BLOCKED", "UN_BLOCKED").optional().description('status'),
     image: Joi.object().optional().keys({
         url: Joi.string().uri({ scheme: ['http', 'https'] }).trim().optional().allow('').description('image').label("Image Url"),
         key: Joi.string().trim().optional().allow('').label("Key")
@@ -39,7 +40,7 @@ export const validateUpdateRanking = Joi.array().items({
     regStartDate: Joi.date().optional().description('regStartDate'),
     regEndDate: Joi.date().optional().description('regEndDate'),
     search: Joi.string().trim().optional().description('search'),
-    status: Joi.string().valid("blocked", "unblocked").optional().description('status'),
+    status: Joi.string().valid("BLOCKED", "UN_BLOCKED", "DELETED").optional().description('status'),
     sortBy: Joi.string().valid("title", "type", "totalProducts", "createdAt","rank").optional().description('sortBy'),
     sortNo: Joi.number().valid(1, -1).optional().description('sortNo'),
     isParent: Joi.boolean().optional().label('Is Parent'),
@@ -51,7 +52,7 @@ export const updateCategory = Joi.object({
     categoryId: Joi.string().trim().regex(REGEX.MONGO_ID).required().description('categoryId'),
     title: Joi.string().trim().optional().min(3)
       .max(100).description('title'),
-    status: Joi.string().valid("blocked", "unblocked").optional().description('status'),
+    status: Joi.string().valid("BLOCKED", "UN_BLOCKED", "DELETED").optional().description('status'),
     parentId:  Joi.string().trim().optional().allow('0').regex(REGEX.MONGO_ID).label('Parent Id'),
     Image: Joi.object().optional().keys({
       url: Joi.string().uri({ scheme: ['http', 'https'] }).trim().optional().allow('').description('image').label("Image Url"),

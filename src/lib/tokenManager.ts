@@ -34,7 +34,6 @@ const validate = async function (token: string, request?: Request, auth: boolean
 		return await Jwt.verify(token, cert);
 
 	} catch (error) {
-
 		if (error && error.name === "TokenExpiredError" && auth) return Promise.reject(responseHandler.sendError(request, MESSAGES.ERROR.SESSION_EXPIRED));
 		if (error && error.name === "TokenExpiredError" && !auth) return Promise.reject(MESSAGES.ERROR.TOKEN_EXPIRED);
 		// throws error if the token has not been encrypted by the private key

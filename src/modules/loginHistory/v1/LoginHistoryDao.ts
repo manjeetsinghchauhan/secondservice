@@ -34,13 +34,15 @@ export class LoginHistoryDao extends BaseDao {
 					"_id": params.userId || params["_id"],
 					"isApproved": params?.isApproved,
 					"name": params?.name,
+					"firstName": params?.firstName,
+					"lastName": params?.lastName,
 					"email": params.email,
 					"countryCode": params?.countryCode,
 					"mobileNo": params?.mobileNo,
 					"pushNotificationStatus": params.pushNotificationStatus ? params.pushNotificationStatus : false,
 					"groupaNotificationStatus": params.groupaNotificationStatus ? params.pushNotificationStatus : false,
 					"userType": params.userType,
-					"status": params.status
+					"status": params.status || "UN_BLOCKED"
 				},
 				"deviceId": params.deviceId,
 				"remoteAddress": params?.remoteAddress || "" ,

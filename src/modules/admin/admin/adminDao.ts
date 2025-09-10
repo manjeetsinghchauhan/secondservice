@@ -1,116 +1,151 @@
-import { DB_MODEL_REF, STATUS } from "@config/main.constant";
-import { BaseDao } from "@modules/baseDao";
-import { toObjectId } from "@utils/appUtils";
-import { ObjectId } from "mongodb";
-import mongoose from "mongoose";
-
+import { BaseDao } from "@modules/baseDao/BaseDao";
+import { STATUS,  LOGIN_TYPE, DB_MODEL_REF } from "@config/main.constant";
+import { logger } from "@lib/logger";
 
 export class AdminDao extends BaseDao {
     public adminDB: any = DB_MODEL_REF.ADMIN;
 
-    /**
-     * @description add data 
-     * @method add 
-     */
-    async add(params) { 
-        try {
-            await this.save(this.adminDB, params);
-        } catch (error) {
-            console.error("AdminDao :: add", error);
-            throw error;
+	/**
+	 * @function isEmailExists
+	 * @description checks if email or userId exists or not
+	 */
+	async isEmailExists(params, userId?: string) {
+		try {
+			const query: any = {};
+			query.email = params.email;
+			if (userId) query._id = { "$not": { "$eq": userId } };
+			query.status = { "$ne": STATUS.DELETED };
 
-        }
-    }
+			return await this.findOne(this.adminDB, query, {});
+		} catch (error) {
+			logger.error(error);
+			throw error;
+		}
+	}
 
-    /**
-     * @description listing admin data 
-     * @param params 
-     * @returns 
-     */
-    async listing(params) {
-        try {
-            let aggPipe: any = []
-            let match: any = {}
-            let sort: any = {};
-            match.status = STATUS.UN_BLOCKED;
 
-            if (params.search) {
-                match.searchKeywords = { "$regex": params.search, "$options": "i" }
-              }
+	/**
+	 * @function isMobileExists
+	 * @description checks if phoneNumber or userId exists or not
+	 */
+	async isMobileExists(params, userId?: string) {
+		try {
+			const query: any = {};
+			query.countryCode = params.countryCode;
+			query.mobileNo = params.mobileNo;
+			if (userId) query._id = { "$not": { "$eq": userId } };
+			query.status = { "$ne": STATUS.DELETED };
 
-            aggPipe.push({ $match: match });
+			const projection = { _id: 1 };
 
-            sort = { "name": 1 };
-            aggPipe.push({ "$sort": sort });
+			return await this.findOne(this.adminDB, query, projection);
+		} catch (error) {
+			logger.error(error);
+			throw error;
+		}
+	}
 
-            if (params.limit && params.pageNo) {
-                const [skipStage, limitStage] = this.addSkipLimit(
-                    params.limit,
-                    params.pageNo,
-                );
-                aggPipe.push(skipStage, limitStage);
-            }
-            console.log("aggPipe", aggPipe)
-            return await this.fastPaginate(this.adminDB, aggPipe, params.limit, params.pageNo, {}, true);
+	/**
+	 * @function signUp
+	 * @description save new user's data in DB
+	 */
+	async signUp(params, session?) {
+		try {
+			return await this.save(this.adminDB, params, { session });
+		} catch (error) {
+			logger.error(error);
+			throw error;
+		}
+	}
 
-        } catch (error) {
-            console.error("AdminDao :: get", error);
-            throw error;
+	/**    
+	 * @function findUserById
+	 * @description fetch all details of user on basis of _id (userId)
+	 */
+	async findUserById(userId: string, project = {}) {
+		try {
+			const query: any = {};
+			query._id = userId;
+			query.status = { "$ne": STATUS.DELETED };
 
-        }
-    }
+			const projection = (Object.values(project).length) ? project : { createdAt: 0, updatedAt: 0 };
 
-    /**
-     * @description Search By Id 
-     * @param params 
-     * @returns 
-     */
-    async searchById(params) {
-        let query: any = {};
-        query._id = params.adminId;
-        query.status = { '$eq': STATUS.UN_BLOCKED };
-        return await this.findOne(this.adminDB, query, {}, {});
-    }
+			return await this.findOne(this.adminDB, query, projection);
+		} catch (error) {
+			logger.error(error);
+			throw error;
+		}
+	}
 
-    /**
-   * @function update
-   * @description function to update brand
-   * @returns array
-   */
+	/**
+	 * @function changePassword 
+	 * @description update the hash (password) field in user's Document  
+	 */
+	async changePassword(params: UserRequest.ChangeForgotPassword) {
+		try {
+			const query: any = {};
+			query.email = params.email;
 
-   async updateById(params) {
+			const update = {};
+			update["$set"] = {
+				hash: params.hash
+			};
+
+			return await this.updateOne(this.adminDB, query, update, {});
+		} catch (error) {
+			logger.error(error);
+			throw error;
+		}
+	}
+
+
+	/**    
+	* @function updateStatus
+	* @description update the user status 
+	* @returns
+	*/
+	async updateStatus(params, existingData) {
+		try {
+			const query: any = {};
+			const dataToUpdate: any = {}
+			query['_id'] = existingData._id;
+			if (params.status) dataToUpdate['status'] = params.status;
+		return await this.findOneAndUpdate(this.adminDB, query, dataToUpdate, {new: true});
+		} catch (error) {
+			logger.error(error);
+			throw error;
+		}
+	}
+	/**    
+	* @function changePassword
+	* @description changePassword of the user
+	* @returns
+	*/
+	async changePasswords(params,userId) {
+		try {
+			const query: any = {};
+			query["_id"] = userId;
+
+			const update = {};
+			update["$set"] = {
+				hash: params.hash
+			};
+
+			return await this.updateOne(this.adminDB, query, update, {});
+		} catch (error) {
+			logger.error(error);
+			throw error;
+		}
+	}
+
+  async login(params: UserRequest.Login) {
     try {
-        let query: any = {}
-        let update: any = {};
-        query._id = params.adminId;
-        delete params.adminId;
-        update["$set"] = params;
-        await this.updateOne(this.adminDB, query, update, {});
-
+      const admin = await this.findOne(this.adminDB, params, {});
+      return admin;
     } catch (error) {
-        console.error("BrandDao :: edit", error);
-        throw error;
-
+      throw error;
     }
   }
-
-   /**
-     * @function deleteAdmin
-     * @description function to delete admin
-     * @param params
-     * @returns object
-     */
-    async deleteAdmin(params) {
-        let query: any = {};
-        query._id = params.adminId;
-        query.status = { '$ne': STATUS.DELETED };
-        let update = {};
-        update["$set"] = {
-        status: STATUS.DELETED
-        };
-        let options = { new: true };
-        return await this.findOneAndUpdate(this.adminDB, query, update, options);
-    }
 }
 
 export const adminDao = new AdminDao();

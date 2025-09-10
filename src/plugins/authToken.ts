@@ -34,13 +34,13 @@ export const plugin = {
 			validate: async (request: Request, accessToken: string, h: ResponseToolkit) => {
 				try {
 					const isValidApiKey = await apiKeyFunction(request.headers.api_key);
-
 					if (!isValidApiKey) {
 						return { isValid: false, credentials: { accessToken: accessToken, tokenData: {} } };
 					} else {
 						const payload = await validateAccessToken(accessToken, request);
+						console.log("########## payload after validateAccessToken #########", payload);
 						await validateTokenData(payload, request);
-
+							
 						if (SERVER.IS_REDIS_ENABLE) {
 							return handleRedisValidation(payload, request);
 						} else {
@@ -61,7 +61,6 @@ export const plugin = {
 		async function handleRedisValidation(payload: any, request: Request) {
 			let userData: any = await redisClient.getValue(`${payload.sub}.${payload.deviceId}`);
 			userData = JSON.parse(userData);
-
 			if (!userData) {
 				userData = await handleUserDataRetrieval(payload);
 			}
@@ -90,7 +89,9 @@ export const plugin = {
 		}
 
 		async function handleTokenValidation(userData: any, payload: any, request: Request) {
-			if (userData.salt !== payload.prm) {
+			const loginData = await loginHistoryDao.findDeviceById({ "userId": payload.sub, "deviceId": payload.deviceId, "salt": payload.prm });
+
+			if (!loginData) {
 				return Promise.reject(responseHandler.sendError(request, MESSAGES.ERROR.SESSION_EXPIRED));
 			}
 

@@ -10,7 +10,7 @@ import { failActionFunction } from "@utils/appUtils";
 import { responseHandler } from "@utils/ResponseHandler";
 import { authorizationHeaderObj } from "@utils/validator";
 import { adminAttributeController } from "./attributeController";
-import { addSchema, listingSchema,validateAttributeId, editSchema } from "./routeValidater";
+import { addSchema, listingSchema,validateAttributeId, editSchema, updateStatusSchema } from "./routeValidater";
 
 
 export const attributesRoute = [
@@ -115,9 +115,9 @@ export const attributesRoute = [
     path: `${SERVER.API_BASE_URL}/admin/attributes/{attributeId}`,
     handler: async (request: any, h: ResponseToolkit) => {
       try {
-        const query = request.query;
+        const params = request.params;
         const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await adminAttributeController.searchById(query, tokenData);
+        const result = await adminAttributeController.searchById(params, tokenData);
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {
         return responseHandler.sendError(request, error);
@@ -131,7 +131,7 @@ export const attributesRoute = [
       },
       validate: {
         headers: authorizationHeaderObj,
-        query: validateAttributeId,
+        params: validateAttributeId,
         failAction: failActionFunction,
       },
       plugins: {
@@ -205,5 +205,54 @@ export const attributesRoute = [
         },
       },
     }
+  },
+  {
+    method: "PATCH",
+    path: `${SERVER.API_BASE_URL}/admin/attributes/status`,
+    handler: async (request: any, h: ResponseToolkit) => {
+      try {
+        const payload = request.payload;
+        const tokenData: TokenData = request.auth?.credentials?.tokenData;
+        const result = await adminAttributeController.updateStatus(payload, tokenData);
+        return responseHandler.sendSuccess(request, h, result);
+      } catch (error) {
+        return responseHandler.sendError(request, error);
+      }
+    },
+    options: {
+      tags: ["api", "attributes"],
+      description: "Update Attribute Status",
+      auth: {
+        strategies: ["UserAuth"]
+      },
+      validate: {
+        headers: authorizationHeaderObj,
+        payload: updateStatusSchema,
+        failAction: failActionFunction,
+      },
+      plugins: {
+        "hapi-swagger": {
+          responses: {
+            200: {
+              description: 'Success',
+              schema: sucessDataSchema
+            },
+            400: {
+              description: 'Bad Request',
+              schema: mediaErrorSchema
+            },
+            401: {
+              description: 'Unauthorized',
+              schema: tokenErrorSchema
+            },
+            500: {
+              description: 'Internal Server Error',
+              schema: internalServerSchema
+            }
+          }
+        },
+      },
+    }
   }
 ]
+

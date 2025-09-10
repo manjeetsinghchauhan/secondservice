@@ -8,7 +8,7 @@ USER node
 RUN cd /usr/src/app && echo $(ls)
 #RUN npm run development
 RUN tsc
-EXPOSE 2000
+EXPOSE 4000
 #ENV ENVIRONMENT="prod"
 #CMD NODE_ENV=development npm run start
 CMD NODE_ENV=development node ./build/server.js

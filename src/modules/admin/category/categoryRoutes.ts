@@ -173,6 +173,7 @@ export const categoriesRoute = [
         const payload = request.query;
         const headers = request.headers;
         const tokenData: TokenData = request.auth?.credentials?.tokenData;
+        console.log("######### admin tokenData ###########", tokenData);
         const result = await adminCategoryControllerV1.getAdminCategories({...payload,...headers});
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {

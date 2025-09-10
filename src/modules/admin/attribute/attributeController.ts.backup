@@ -60,20 +60,5 @@ class AdminAttributeController {
             throw error;
         }
     }
-
-    async updateStatus(params,tokenData) {
-        try {
-            params.lastModifiedBy = {
-                userId:tokenData.userId, 
-                email: tokenData.email,
-                adminType: tokenData.userType
-            };
-            await adminAttributeDao.updateById(params);
-            return ATTRIBUTE_MESSAGE.SUCCESS.UPDATE_ATTRIBUTE;
-        } catch (error) {
-            console.error("AttributeController :: updateStatus", error);
-            throw error;
-        }
-    }
 }
 export const adminAttributeController = new AdminAttributeController();

@@ -38,3 +38,8 @@ export const editSchema = Joi.object({
   status: Joi.string().trim().optional().valid(STATUS.UN_BLOCKED, STATUS.BLOCKED, STATUS.DELETED),
   searchKeywords:Joi.array().optional()
 })
+
+export const updateStatusSchema = Joi.object({
+  attributeId: Joi.string().trim().regex(REGEX.MONGO_ID).required().description('attributeId'),
+  status: Joi.string().trim().required().valid(STATUS.UN_BLOCKED, STATUS.BLOCKED, STATUS.DELETED).description('status')
+})

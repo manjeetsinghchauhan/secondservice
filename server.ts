@@ -50,7 +50,7 @@ import { bootstrap } from "@utils/BootStrap";
       
       this.server = Hapi.server({
         port: SERVER.PORT,
-        host: 'localhost',
+        host: '0.0.0.0',
         routes: {
             cors: {
               origin: ['*'], // or your exact domain

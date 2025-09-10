@@ -3,9 +3,10 @@
 import axios from "axios";
 
 import { SERVER } from "@config/environment";
+import { logger } from "@lib/logger";
 
 const sendMessageToFlock = async (error: { title: string, error: any, request?: any }) => {
-	if (SERVER.ENVIRONMENT !== "localhost") {
+	if (SERVER.ENVIRONMENT !== "localhost" && SERVER.FLOCK_URL) {
 		let formatedMessage = `<flockml><strong>${SERVER.ENVIRONMENT.toUpperCase()} : ${error.title}</strong></br>`;
 		if (error?.request) {
 			const path = `${"Request Path=======>"}</strong> ${error.request?.method.toUpperCase() + " " + error.request?.path}</br>`;
@@ -18,15 +19,20 @@ const sendMessageToFlock = async (error: { title: string, error: any, request?: 
 		}
 		formatedMessage += `${typeof error.error == "object" ? JSON.stringify(error.error) : error.error}</flockml>`;
 
-		const response = await axios.post(`${SERVER.FLOCK_URL}`,
-			JSON.stringify({ flockml: formatedMessage }),
-			{
-				headers: {
-					"Content-Type": "application/json"
-				}
-			});
+		try {
+			const response = await axios.post(`${SERVER.FLOCK_URL}`,
+				JSON.stringify({ flockml: formatedMessage }),
+				{
+					headers: {
+						"Content-Type": "application/json"
+					}
+				});
 
-		return response.data.data ? response.data.data : response.data;
+			return response.data.data ? response.data.data : response.data;
+		} catch (axiosError) {
+			logger.error("Flock message sending failed:", axiosError);
+			return null;
+		}
 	}else{
 		return;
 	}

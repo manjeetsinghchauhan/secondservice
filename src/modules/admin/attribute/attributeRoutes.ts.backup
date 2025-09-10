@@ -3,33 +3,33 @@ import { ResponseToolkit } from "@hapi/hapi";
 import { internalServerSchema, 
          tokenErrorSchema, 
          createDataSchema,
-         adminErrorSchema,
+         mediaErrorSchema,
          sucessDataSchema 
-        } from "@modules/admin/admin/swaggerRespnse";
+        } from "@modules/admin/attribute/swaggerRespnse";
 import { failActionFunction } from "@utils/appUtils";
 import { responseHandler } from "@utils/ResponseHandler";
 import { authorizationHeaderObj } from "@utils/validator";
-import { adminController } from "./adminController";
-import { addSchema, listingSchema,validateAdminId, editSchema } from "./routeValidater";
+import { adminAttributeController } from "./attributeController";
+import { addSchema, listingSchema,validateAttributeId, editSchema } from "./routeValidater";
 
 
-export const adminRoute = [
+export const attributesRoute = [
   {
     method: "POST",
-    path: `${SERVER.API_BASE_URL}/admin/admins`,
+    path: `${SERVER.API_BASE_URL}/admin/attributes`,
     handler: async (request: any, h: ResponseToolkit) => {
       try {
         const payload = request.payload;
         const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await adminController.add(payload,tokenData);
+        const result = await adminAttributeController.add(payload,tokenData);
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {
         return responseHandler.sendError(request, error);
       }
     },
     options: {
-      tags: ["api", "admin user"],
-      description: "Admin uploaded",
+      tags: ["api", "attributes"],
+      description: "Add new Attribute",
       auth: {
         strategies: ["UserAuth"],
       },
@@ -47,7 +47,7 @@ export const adminRoute = [
             },
             400: {
               description: 'Bad Request',
-              schema: adminErrorSchema
+              schema: mediaErrorSchema
             },
             401: {
               description: 'Unauthorized',
@@ -64,20 +64,20 @@ export const adminRoute = [
   },
   {
       method: "GET",
-      path: `${SERVER.API_BASE_URL}/admin/admins`,
+      path: `${SERVER.API_BASE_URL}/admin/attributes`,
       handler: async (request: any, h: ResponseToolkit) => {
         try {
           const query = request.query;
           const tokenData: TokenData = request.auth?.credentials?.tokenData;
-          const result = await adminController.listing(query, tokenData);
+          const result = await adminAttributeController.listing(query, tokenData);
           return responseHandler.sendSuccess(request, h, result);
         } catch (error) {
           return responseHandler.sendError(request, error);
         }
       },
       options: {
-        tags: ["api", "admin user"],
-        description: "List All Admin",
+        tags: ["api", "attributes"],
+        description: "List All Attributes",
         auth: {
           strategies: ["UserAuth"]
         },
@@ -95,7 +95,7 @@ export const adminRoute = [
               },
               400: {
                 description: 'Bad Request',
-                schema: adminErrorSchema
+                schema: mediaErrorSchema
               },
               401: {
                 description: 'Unauthorized',
@@ -112,26 +112,26 @@ export const adminRoute = [
   },
   {
     method: "GET",
-    path: `${SERVER.API_BASE_URL}/admin/admins/{adminId}`,
+    path: `${SERVER.API_BASE_URL}/admin/attributes/{attributeId}`,
     handler: async (request: any, h: ResponseToolkit) => {
       try {
-        const query = request.query;
+        const params = request.params;
         const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await adminController.searchById(query, tokenData);
+        const result = await adminAttributeController.searchById(params, tokenData);
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {
         return responseHandler.sendError(request, error);
       }
     },
     options: {
-      tags: ["api", "admin user"],
-      description: "Admin by Id",
+      tags: ["api", "attributes"],
+      description: "Search Attributes by Id",
       auth: {
         strategies: ["UserAuth"]
       },
       validate: {
         headers: authorizationHeaderObj,
-        query: validateAdminId,
+        params: validateAttributeId,
         failAction: failActionFunction,
       },
       plugins: {
@@ -143,7 +143,7 @@ export const adminRoute = [
             },
             400: {
               description: 'Bad Request',
-              schema: adminErrorSchema
+              schema: mediaErrorSchema
             },
             401: {
               description: 'Unauthorized',
@@ -160,20 +160,20 @@ export const adminRoute = [
   },
   {
     method: "PUT",
-    path: `${SERVER.API_BASE_URL}/admin/admins`,
+    path: `${SERVER.API_BASE_URL}/admin/attributes`,
     handler: async (request: any, h: ResponseToolkit) => {
       try {
         const payload = request.payload;
         const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await adminController.updateById(payload, tokenData);
+        const result = await adminAttributeController.updateById(payload, tokenData);
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {
         return responseHandler.sendError(request, error);
       }
     },
     options: {
-      tags: ["api", "admin user"],
-      description: "Admin update by Id",
+      tags: ["api", "attributes"],
+      description: "Update Attribute by Id",
       auth: {
         strategies: ["UserAuth"]
       },
@@ -191,7 +191,7 @@ export const adminRoute = [
             },
             400: {
               description: 'Bad Request',
-              schema: adminErrorSchema
+              schema: mediaErrorSchema
             },
             401: {
               description: 'Unauthorized',
@@ -205,56 +205,5 @@ export const adminRoute = [
         },
       },
     }
-  },
-  {
-      method: "DELETE",
-      path: `${SERVER.API_BASE_URL}/admin/admins/{adminId}`,
-      handler: async (request: any, h: ResponseToolkit) => {
-        try {
-          let params = request.params;
-          const tokenData: TokenData = request.auth?.credentials?.tokenData;
-          const result = await adminController.deleteAdmin(params);
-          return responseHandler.sendSuccess(request, h, result);
-        } catch (error) {
-          return responseHandler.sendError(request, error);
-        }
-      },
-      options: {
-        tags: ["api", "admin user"],
-        description: "Admin Delete Admin",
-        auth: {
-          strategies: ["UserAuth"]
-        },
-        validate: {
-          headers: authorizationHeaderObj,
-          params: validateAdminId,
-          failAction: failActionFunction,
-          options: {
-            abortEarly: false
-          }
-        },
-        plugins: {
-          "hapi-swagger": {
-            responses: {
-              200: {
-                description: 'Success',
-                schema: sucessDataSchema
-              },
-              400: {
-                description: 'Bad Request',
-                schema: adminErrorSchema
-              },
-              401: {
-                description: 'Unauthorized',
-                schema: tokenErrorSchema
-              },
-              500: {
-                description: 'Internal Server Error',
-                schema: internalServerSchema
-              }
-            }
-          },
-        }
-      }
   }
 ]
