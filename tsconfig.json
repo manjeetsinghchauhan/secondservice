@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "noImplicitAny": false,
     "typeRoots": [
-      "node_modules/@types"
+      "node_modules/@types", "./src/interfaces"
 
       // "./src/interfaces/index.d.ts"
     ],

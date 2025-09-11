@@ -11,3 +11,4 @@ export { brands } from "./admin/brand/brandModel";
 export { attributes } from "./admin/attribute/attributeModel";
 export { pincodes } from "./admin/pincode/pincodeModel"; 
 export { admins } from "./admin/admin/adminModel";
+export { serviceTypes as service_types } from "./admin/serviceType/serviceTypeModel";

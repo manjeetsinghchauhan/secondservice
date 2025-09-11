@@ -14,5 +14,11 @@ declare interface LoginHistoryRequest extends Device {
 		status: string;
 	};
 	lastLogin?: number;
-	location?: {};
+	location?: {
+		status?: string;
+		timezone?: string;
+	};
+	deviceToken?: string;
+	salt?: string;
+	timezone?: string;
 }

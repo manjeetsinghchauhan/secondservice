@@ -835,6 +835,8 @@ export class UserController {
       }
       else{
         let userData = {
+          "deviceId": params.deviceId,
+          "platform": params.platform,
           "firstName":tempUserExists.firstName,
           "lastName":tempUserExists.lastName,
           "email":tempUserExists.email,

@@ -4,9 +4,8 @@ import { toObjectId } from "@utils/appUtils";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
-
-export class AdminBrandDao extends BaseDao {
-    public brandDB: any = DB_MODEL_REF.BRAND;
+export class AdminServiceTypeDao extends BaseDao {
+    public serviceTypeDB: any = DB_MODEL_REF.SERVICE_TYPE;
 
     /**
      * @description add data 
@@ -14,16 +13,15 @@ export class AdminBrandDao extends BaseDao {
      */
     async add(params) { 
         try {
-            await this.save(this.brandDB, params);
+            await this.save(this.serviceTypeDB, params);
         } catch (error) {
-            console.error("BrandDao :: add", error);
+            console.error("ServiceTypeDao :: add", error);
             throw error;
-
         }
     }
 
     /**
-     * @description listing media data 
+     * @description listing service type data 
      * @param params 
      * @returns 
      */
@@ -35,8 +33,8 @@ export class AdminBrandDao extends BaseDao {
             match.status = { '$in': [STATUS.UN_BLOCKED, STATUS.BLOCKED] };
 
             if (params.search) {
-                match.searchKeywords = { "$regex": params.search, "$options": "i" }
-              }
+                match.name = { "$regex": params.search, "$options": "i" }
+            }
 
             aggPipe.push({ $match: match });
 
@@ -51,12 +49,11 @@ export class AdminBrandDao extends BaseDao {
                 aggPipe.push(skipStage, limitStage);
             }
             console.log("aggPipe", aggPipe)
-            return await this.fastPaginate(this.brandDB, aggPipe, params.limit, params.pageNo, {}, true);
+            return await this.fastPaginate(this.serviceTypeDB, aggPipe, params.limit, params.pageNo, {}, true);
 
         } catch (error) {
-            console.error("BrandDao :: get", error);
+            console.error("ServiceTypeDao :: get", error);
             throw error;
-
         }
     }
 
@@ -67,52 +64,52 @@ export class AdminBrandDao extends BaseDao {
      */
     async searchById(params) {
         let query: any = {};
-        query._id = params.brandId;
+        query._id = params.serviceTypeId;
         query.status = { '$in': [STATUS.UN_BLOCKED, STATUS.BLOCKED] };
-        return await this.findOne(this.brandDB, query, {}, {});
+        return await this.findOne(this.serviceTypeDB, query, {}, {});
     }
 
     /**
    * @function update
-   * @description function to update brand
+   * @description function to update service type
    * @returns array
    */
    async updateById(params) {
     try {
         let query: any = {}
         let update: any = {};
-        query._id = params.brandId;
-        delete params.brandId;
+        query._id = params.serviceTypeId;
+        delete params.serviceTypeId;
         update["$set"] = params;
-        await this.updateOne(this.brandDB, query, update, {});
+        await this.updateOne(this.serviceTypeDB, query, update, {});
 
     } catch (error) {
-        console.error("BrandDao :: edit", error);
+        console.error("ServiceTypeDao :: edit", error);
         throw error;
     }
   }
 
    /**
-     * @function deleteBrand
-     * @description function to delete brand
+     * @function deleteServiceType
+     * @description function to delete service type
      * @param params
      * @returns object
      */
-    async deleteBrand(params) {
+    async deleteServiceType(params) {
         let query: any = {};
-        query._id = params.brandId;
+        query._id = params.serviceTypeId;
         query.status = { '$ne': STATUS.DELETED };
         let update = {};
         update["$set"] = {
         status: STATUS.DELETED
         };
         let options = { new: true };
-        return await this.findOneAndUpdate(this.brandDB, query, update, options);
+        return await this.findOneAndUpdate(this.serviceTypeDB, query, update, options);
     }
 
     /**
      * @function checkNameExists
-     * @description function to check if brand name already exists
+     * @description function to check if service type name already exists
      * @param name
      * @param excludeId
      * @returns boolean
@@ -126,8 +123,8 @@ export class AdminBrandDao extends BaseDao {
             query._id = { '$ne': toObjectId(excludeId) };
         }
         
-        return await this.findOne(this.brandDB, query, {}, {});
+        return await this.findOne(this.serviceTypeDB, query, {}, {});
     }
 }
 
-export const adminBrandDao = new AdminBrandDao();
+export const adminServiceTypeDao = new AdminServiceTypeDao();

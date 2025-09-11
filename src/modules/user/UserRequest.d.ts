@@ -115,7 +115,7 @@ declare namespace UserRequest {
 	}
 
 
-	export interface verifySignUp {
+	export interface verifySignUp extends Device {
 		userId: string;
 		otp: string;
 	}
