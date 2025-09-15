@@ -816,6 +816,125 @@ export class AdminCategoryDao extends BaseDao {
         return await this.findOne(this.categoryDB, query, {}, {});
     }
 
+    /**
+     * @function getCategoriesByParentId
+     * @description function to get all categories by parentId
+     * @param params
+     * @returns array
+     */
+    async getCategoriesByParentId(params) {
+        let { parentId, page, limit, status, sortBy, sortNo } = params;
+        let query: any = {};
+        let sort: any = {};
+        let sorted = -1;
+
+        page = page && page > 0 ? parseInt(page) : 1;
+        limit = limit && limit > 0 ? parseInt(limit) : 10;
+
+        if (sortNo && sortNo == 1) {
+            sorted = 1;
+        }
+
+        if (sortBy) {
+            switch (sortBy) {
+                case "title":
+                    sort = { title: sorted };
+                    break;
+                case "rank":
+                    sort = { rank: sorted };
+                    break;
+                case "createdAt":
+                    sort = { createdAt: sorted };
+                    break;
+                default:
+                    sort = { rank: 1 };
+                    break;
+            }
+        } else {
+            sort = { rank: 1 };
+        }
+
+        // Set parentId in query
+        query.parentId = parentId;
+
+        // Set status filter
+        if (status) {
+            query.status = status;
+        } else {
+            query.status = { "$ne": STATUS.DELETED };
+        }
+
+        let pipeline = [
+            { $match: query },
+            { "$unwind": { path: "$filters", preserveNullAndEmptyArrays: true } },
+            { "$unwind": { path: "$filters_data", preserveNullAndEmptyArrays: true } },
+            { "$project": {
+                _id: 1,
+                "filters_data._id": 1,
+                "filters_data.name": 1,
+                status: 1,
+                title: 1,
+                icon: 1,
+                image: 1,
+                level: 1,
+                lName: 1,
+                rank: 1,
+                ancestors: 1,
+                createdAt: 1,
+                totalProducts: 1,
+                updatedAt: 1,
+                parentId: 1
+            } },
+            { "$group": {
+                "_id": "$_id",
+                filters: { "$push": "$filters_data" },
+                status: { "$first": "$status" },
+                title: { "$first": "$title" },
+                icon: { "$first": "$icon" },
+                image: { "$first": "$image" },
+                level: { "$first": "$level" },
+                lName: { "$first": "$lName" },
+                rank: { "$first": "$rank" },
+                ancestors: { "$first": "$ancestors" },
+                createdAt: { "$first": "$createdAt" },
+                totalProducts: { "$first": "$totalProducts" },
+                updatedAt: { "$first": "$updatedAt" },
+                parentId: { "$first": "$parentId" }
+            } },
+            { "$sort": sort },
+            {
+                "$facet": {
+                    edges: [
+                        { "$skip": DEFAULT.PAGING_LIMIT_IN_APP * (page - 1) },
+                        { "$limit": limit }
+                    ],
+                    pageInfo: [
+                        { "$group": { _id: null, count: { "$sum": 1 } } }
+                    ]
+                }
+            }
+        ];
+
+        let categories = await this.aggregate(this.categoryDB, pipeline, {});
+
+        let result: any = {};
+        let totalCount = 0;
+
+        if (categories[0].pageInfo[0]) {
+            totalCount = categories[0].pageInfo[0].count;
+            categories = categories[0].edges;
+        } else {
+            totalCount = 0;
+            categories = [];
+        }
+
+        result.totalCount = totalCount;
+        result.page = page;
+        result.limit = limit;
+        result.categories = categories;
+        return result;
+    }
+
 }
 
 export const adminCategoryDao = new AdminCategoryDao();

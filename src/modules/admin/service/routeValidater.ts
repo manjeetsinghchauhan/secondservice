@@ -27,7 +27,7 @@ export const addSchema = Joi.object({
     salePrice: Joi.number().required().label('Sale price'),
     defaultPrice: Joi.number().optional().label('Default price'),
     isRefundable: Joi.boolean().optional().label('Is refundable'),
-    refundPeriod: Joi.string().trim().optional(),
+    refundPeriod: Joi.number().optional().label("Refund period in days"),
     searchKeywords:Joi.array().optional(), 
     isPublished: Joi.boolean().required().label('Is published?'),
     isFeatured: Joi.boolean().required().label('Is feaured?'),
@@ -35,7 +35,7 @@ export const addSchema = Joi.object({
 })
 
 export const listingSchema = Joi.object({
-    page: Joi.number().min(0).optional().description("page"),
+    pageNo: Joi.number().min(1).required().description("pageNo"),
     limit: Joi.number().min(0).max(500).optional().description("limit"),
     search: Joi.string().trim().optional().description('search'),
 })
@@ -50,7 +50,7 @@ export const listingSchema = Joi.object({
       Joi.array().items(Joi.string().regex(REGEX.MONGO_ID)),
       Joi.string().regex(REGEX.MONGO_ID)
     ).description("brandId"),    
-    page: Joi.number().min(0).optional().description("page"),
+    pageNo: Joi.number().min(1).required().description("pageNo"),
     limit: Joi.number().min(0).max(500).optional().description("limit"),
     search: Joi.string().trim().optional().description('search'),
     status: Joi.string().valid("BLOCKED", "UN_BLOCKED", "DELETED").optional().description('status'),
@@ -83,7 +83,7 @@ export const updateService = Joi.object({
     salePrice: Joi.number().required().label('Sale price'),
     defaultPrice: Joi.number().optional().label('Default price'),
     isRefundable: Joi.boolean().optional().label('Is refundable'),
-    refundPeriod: Joi.string().trim().optional(),
+    refundPeriod: Joi.number().optional().label("Refund period in days"),
     searchKeywords:Joi.array().optional(), 
     isPublished: Joi.boolean().required().label('Is published?'),
     isFeatured: Joi.boolean().required().label('Is feaured?'),

@@ -31,7 +31,7 @@ export const updateSchema = Joi.object({
 export const listingSchema = Joi.object({
     pageNo: Joi.number().min(1).required(),
     limit: Joi.number().min(1).required(),
-    pincode: Joi.string().trim().optional().allow('').label("pincode")
+    search: Joi.string().trim().optional().allow('').label("search")
 })
 
 export const validateByPincode = Joi.object({

@@ -15,7 +15,7 @@ import { addSchema,
          validateUpdateRanking, 
          validateSearchingFiltering,
          updateCategory,
-         validateCategoryId } from "./routeValidater";
+         validateCategoryId, validateParentIdParams, validateParentIdQuery } from "./routeValidater";
 
 export const categoriesRoute = [
   {
@@ -370,5 +370,58 @@ export const categoriesRoute = [
         },
       }
     }
+  },
+  {
+    method: "GET",
+    path: `${SERVER.API_BASE_URL}/admin/categories/parent/{parentId}`,
+    handler: async (request: any, h: ResponseToolkit) => {
+      try {
+        const params = { ...request.params, ...request.query };
+        const tokenData: TokenData = request.auth?.credentials?.tokenData;
+        const result = await adminCategoryControllerV1.getCategoriesByParentId(params);
+        return responseHandler.sendSuccess(request, h, result);
+      } catch (error) {
+        return responseHandler.sendError(request, error);
+      }
+    },
+    options: {
+      tags: ["api", "categories"],
+      description: "Get Categories by Parent ID",
+      auth: {
+        strategies: ["UserAuth"]
+      },
+      validate: {
+        headers: authorizationHeaderObj,
+        params: validateParentIdParams,
+        query: validateParentIdQuery,
+        failAction: failActionFunction,
+        options: {
+          abortEarly: false
+        }
+      },
+      plugins: {
+        "hapi-swagger": {
+          responses: {
+            200: {
+              description: "Success",
+              schema: sucessDataSchema
+            },
+            400: {
+              description: "Bad Request",
+              schema: errorDataSchema
+            },
+            401: {
+              description: "Unauthorized",
+              schema: tokenErrorSchema
+            },
+            500: {
+              description: "Internal Server Error",
+              schema: internalServerSchema
+            }
+          }
+        }
+      }
+    }
   }
 ]
+

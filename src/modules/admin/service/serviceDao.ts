@@ -150,7 +150,7 @@ export class AdminServiceDao extends BaseDao {
             bundleBuying:1, bundleDiscount:1, isSubscribable:1, subscriptionDiscount:1, 
             dealOfTheDay:1, dealOfTheDayDiscount:1, isRefundable:1, refundPeriod:1, 
             isPublished:1, isFeatured:1, bookedCount:1, status: 1, salePrice: 1, 
-            defaultPrice: 1, lName: 1, createdAt: 1, updatedAt: 1, categoryData:1, attributeData: 1, brandData:1 } },
+            defaultPrice: 1, lName: 1, description: 1, searchKeywords: 1, lastModifiedBy: 1, lastModifiedAt: 1, createdAt: 1, updatedAt: 1, categoryData:1, attributeData: 1, brandData:1 } },
         ];
       
         const result = await this.aggregate(this.serviceDB, pipeline, {})
@@ -166,13 +166,13 @@ export class AdminServiceDao extends BaseDao {
  */
 
   async filterAndSearchServices(params) {
-    let { serviceId, categoryId, brandId, page, limit, search, sortBy, sortNo, status } = params;
+    let { serviceId, categoryId, brandId, pageNo, limit, search, sortBy, sortNo, status } = params;
     let query: any = {};
     let sort: any = {};
     let sorted;
     let pagination: any = {};
     
-    page = page && page > 0 ? parseInt(page) : 1;
+    let page = pageNo && pageNo > 0 ? parseInt(pageNo) : 1;
     limit = limit && limit > 0 ? parseInt(limit) : 10;
 
     if (sortNo) {
@@ -229,7 +229,7 @@ export class AdminServiceDao extends BaseDao {
     }
 
     pagination = {
-      page: parseInt(page),
+      page: page,
       limit: parseInt(limit),
       sort
     }
@@ -269,7 +269,7 @@ export class AdminServiceDao extends BaseDao {
         bundleBuying:1, bundleDiscount:1, isSubscribable:1, subscriptionDiscount:1, 
         dealOfTheDay:1, dealOfTheDayDiscount:1, isRefundable:1, refundPeriod:1, 
         isPublished:1, isFeatured:1, bookedCount:1, status: 1, salePrice: 1, 
-        defaultPrice: 1, lName: 1, createdAt: 1, updatedAt: 1, attributeData: 1, brandData:1 } },
+        defaultPrice: 1, lName: 1, description: 1, searchKeywords: 1, lastModifiedBy: 1, lastModifiedAt: 1, createdAt: 1, updatedAt: 1, attributeData: 1, brandData:1 } },
       { "$sort": { createdAt: -1 } },
       {
         '$facet': {

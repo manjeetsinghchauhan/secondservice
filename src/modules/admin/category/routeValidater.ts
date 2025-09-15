@@ -73,3 +73,14 @@ export const updateCategory = Joi.object({
 export const validateCategoryId = Joi.object({
     categoryId: Joi.string().trim().regex(REGEX.MONGO_ID).required().description('categoryId')
   })
+export const validateParentIdParams = Joi.object({
+    parentId: Joi.string().trim().regex(REGEX.MONGO_ID).required().description("Parent Category ID")
+});
+
+export const validateParentIdQuery = Joi.object({
+    page: Joi.number().min(1).optional().description("page"),
+    limit: Joi.number().min(1).max(500).optional().description("limit"),
+    status: Joi.string().valid("BLOCKED", "UN_BLOCKED", "DELETED").optional().description("status"),
+    sortBy: Joi.string().valid("title", "rank", "createdAt").optional().description("sortBy"),
+    sortNo: Joi.number().valid(1, -1).optional().description("sortNo")
+});

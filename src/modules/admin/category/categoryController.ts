@@ -182,5 +182,20 @@ class AdminCategoryController {
         throw error;
         }
     }
+
+    /**
+     * @function getCategoriesByParentId
+     * @description function to get all categories by parentId
+     * @param params
+     * @returns array
+     */
+    async getCategoriesByParentId(params) {
+        try {
+            const result = await adminCategoryDaoV1.getCategoriesByParentId(params);
+            return CATEGORY_MESSAGE.SUCCESS.GET_CATEGORY(result);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 export const adminCategoryController = new AdminCategoryController();

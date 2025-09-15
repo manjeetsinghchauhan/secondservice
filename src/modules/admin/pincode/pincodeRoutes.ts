@@ -77,7 +77,7 @@ export const pincodesRoute = [
       },
       options: {
         tags: ["api", "pincodes"],
-        description: "List All pincodes",
+        description: "List All pincodes with search functionality. Search parameter searches across pincode, district name, and state name fields.",
         auth: {
           strategies: ["UserAuth"]
         },
@@ -115,9 +115,9 @@ export const pincodesRoute = [
     path: `${SERVER.API_BASE_URL}/admin/pincodes/{pincode}`,
     handler: async (request: any, h: ResponseToolkit) => {
       try {
-        const query = request.query;
+        const params = request.params;
         const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await adminPincodeController.searchByPincode(query, tokenData);
+        const result = await adminPincodeController.searchByPincode(params, tokenData);
         return responseHandler.sendSuccess(request, h, result);
       } catch (error) {
         return responseHandler.sendError(request, error);
@@ -125,13 +125,13 @@ export const pincodesRoute = [
     },
     options: {
       tags: ["api", "pincodes"],
-      description: "Search Pincode details by pincode",
+      description: "Get pincode by pincode number",
       auth: {
         strategies: ["UserAuth"]
       },
       validate: {
         headers: authorizationHeaderObj,
-        query: validateByPincode,
+        params: validateByPincode,
         failAction: failActionFunction,
       },
       plugins: {
@@ -173,7 +173,7 @@ export const pincodesRoute = [
     },
     options: {
       tags: ["api", "pincodes"],
-      description: "Update Pincode details by pincode",
+      description: "Update pincode by ID",
       auth: {
         strategies: ["UserAuth"]
       },

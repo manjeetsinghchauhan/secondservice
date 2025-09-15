@@ -73,11 +73,11 @@ let ServiceSchema = new Schema({
   bundleBuying: { type: Boolean, required: false, index: false },
   bundleDiscount: {
     type: Number,
-    max: [0, 'bundleDiscount must be positive.']
+    min: [0, 'bundleDiscount must be positive.']
   },
   subscriptionDiscount: {
     type: Number,
-    max: [0, 'subscriptionDiscount must be positive.']
+    min: [0, 'subscriptionDiscount must be positive.']
   },
   isSubscribable: { type: Boolean, required: false, default: false },
   status: {
@@ -92,7 +92,7 @@ let ServiceSchema = new Schema({
   dealOfTheDay: { type: Boolean, required: false, default: false },
   dealOfTheDayDiscount: {
     type: Number,
-    max: [0, 'dealOfTheDayDiscount must be positive.']
+    min: [0, 'dealOfTheDayDiscount must be positive.']
   },
   salePrice: { type: Number, required: true, default: 0 },
   defaultPrice: { type: Number, required: false, default: 0 }, 

@@ -23,7 +23,7 @@ export class AdminPincodeDao extends BaseDao {
     }
 
     /**
-     * @description listing media data 
+     * @description listing pincode data 
      * @param params 
      * @returns 
      */
@@ -33,9 +33,13 @@ export class AdminPincodeDao extends BaseDao {
             let match: any = {}
             let sort: any = {};
 
-            if (params.pincode) {
-                match.pincode = { "$regex": params.pincode, "$options": "i" }
-              }
+            if (params.search) {
+                match.$or = [
+                    { pincode: { "$regex": params.search, "$options": "i" } },
+                    { districtName: { "$regex": params.search, "$options": "i" } },
+                    { stateName: { "$regex": params.search, "$options": "i" } }
+                ];
+            }
 
             aggPipe.push({ $match: match });
 
