@@ -1,0 +1,205 @@
+/**
+ * Filename: serviceLocationRoutes.ts
+ * Purpose: Routes for serviceLocation operations
+ * Owner: Secondservice
+ * Maintainer: dothesmart
+ */
+
+import Joi from "joi";
+import { SERVER } from "@config/environment";
+import { ResponseToolkit } from "@hapi/hapi";
+import { 
+    internalServerSchema, 
+    tokenErrorSchema, 
+    errorDataSchema,
+    sucessDataSchema 
+} from "./swaggerResponse";
+import { failActionFunction } from "@utils/appUtils";
+import { responseHandler } from "@utils/ResponseHandler";
+import { authorizationHeaderObj } from "@utils/validator";
+import { serviceLocationController } from ".";
+import { validateCreateServiceLocation } from "./routeValidater";
+
+export const serviceLocationRoutes = [
+    {
+        method: "GET",
+        path: `${SERVER.API_BASE_URL}/admin/service-locations`,
+        handler: async (request: any, h: ResponseToolkit) => {
+            try {
+                const payload = request.query;
+                const tokenData: TokenData = request.auth?.credentials?.tokenData;
+                const result = await serviceLocationController.getAllServiceLocations(payload);
+                return responseHandler.sendSuccess(request, h, result);
+            } catch (error) {
+                return responseHandler.sendError(request, error);
+            }
+        },
+        options: {
+            tags: ["api", "service-locations"],
+            description: "Get all service locations with pagination and search",
+            auth: {
+                strategies: ["UserAuth"]
+            },
+            validate: {
+                headers: authorizationHeaderObj,
+                query: Joi.object({
+                    pageNo: Joi.number().min(1).required().description("Page Number"),
+                    limit: Joi.number().min(0).max(500).optional().description("Limit per page"),
+                    search: Joi.string().trim().optional().description("Search term"),
+                    isEnabled: Joi.boolean().optional().description("Filter by enabled status"),
+                    isOverride: Joi.boolean().optional().description("Filter by override status"),
+                    isPublished: Joi.boolean().optional().description("Filter by published status")
+                }),
+                failAction: failActionFunction,
+                options: {
+                    abortEarly: false
+                }
+            },
+            plugins: {
+                "hapi-swagger": {
+                    responses: {
+                        200: {
+                            description: 'Success',
+                            schema: sucessDataSchema
+                        },
+                        400: {
+                            description: 'Bad Request',
+                            schema: errorDataSchema
+                        },
+                        401: {
+                            description: 'Unauthorized',
+                            schema: tokenErrorSchema
+                        },
+                        500: {
+                            description: 'Internal Server Error',
+                            schema: internalServerSchema
+                        }
+                    }
+                },
+            }
+        }
+    },
+    {
+        method: "GET",
+        path: `${SERVER.API_BASE_URL}/admin/service-locations/service/{serviceId}`,
+        handler: async (request: any, h: ResponseToolkit) => {
+            try {
+                const payload = { ...request.params, ...request.query };
+                const tokenData: TokenData = request.auth?.credentials?.tokenData;
+                const result = await serviceLocationController.getServiceLocationsByServiceId(payload);
+                return responseHandler.sendSuccess(request, h, result);
+            } catch (error) {
+                return responseHandler.sendError(request, error);
+            }
+        },
+        options: {
+            tags: ["api", "service-locations"],
+            description: "Get all service locations for a specific service",
+            auth: {
+                strategies: ["UserAuth"]
+            },
+            validate: {
+                headers: authorizationHeaderObj,
+                params: Joi.object({
+                    serviceId: Joi.string().trim().regex(/^[a-f\d]{24}$/i).required().description("Service ID")
+                }),
+                query: Joi.object({
+                    pageNo: Joi.number().min(1).optional().description("Page Number"),
+                    limit: Joi.number().min(0).max(500).optional().description("Limit per page")
+                }),
+                failAction: failActionFunction,
+                options: {
+                    abortEarly: false
+                }
+            },
+            plugins: {
+                "hapi-swagger": {
+                    responses: {
+                        200: {
+                            description: 'Success',
+                            schema: sucessDataSchema
+                        },
+                        400: {
+                            description: 'Bad Request',
+                            schema: errorDataSchema
+                        },
+                        401: {
+                            description: 'Unauthorized',
+                            schema: tokenErrorSchema
+                        },
+                        404: {
+                            description: 'Not Found',
+                            schema: errorDataSchema
+                        },
+                        500: {
+                            description: 'Internal Server Error',
+                            schema: internalServerSchema
+                        }
+                    }
+                },
+            }
+        }
+    },
+    {
+        method: "GET",
+        path: `${SERVER.API_BASE_URL}/admin/service-locations/district/{districtName}/{stateName}`,
+        handler: async (request: any, h: ResponseToolkit) => {
+            try {
+                const payload = { ...request.params, ...request.query };
+                const tokenData: TokenData = request.auth?.credentials?.tokenData;
+                const result = await serviceLocationController.getServiceLocationsByDistrict(payload);
+                return responseHandler.sendSuccess(request, h, result);
+            } catch (error) {
+                return responseHandler.sendError(request, error);
+            }
+        },
+        options: {
+            tags: ["api", "service-locations"],
+            description: "Get all service locations for a specific district",
+            auth: {
+                strategies: ["UserAuth"]
+            },
+            validate: {
+                headers: authorizationHeaderObj,
+                params: Joi.object({
+                    districtName: Joi.string().trim().required().min(2).max(50).description("District Name"),
+                    stateName: Joi.string().trim().required().min(2).max(50).description("State Name")
+                }),
+                query: Joi.object({
+                    pageNo: Joi.number().min(1).optional().description("Page Number"),
+                    limit: Joi.number().min(0).max(500).optional().description("Limit per page")
+                }),
+                failAction: failActionFunction,
+                options: {
+                    abortEarly: false
+                }
+            },
+            plugins: {
+                "hapi-swagger": {
+                    responses: {
+                        200: {
+                            description: 'Success',
+                            schema: sucessDataSchema
+                        },
+                        400: {
+                            description: 'Bad Request',
+                            schema: errorDataSchema
+                        },
+                        401: {
+                            description: 'Unauthorized',
+                            schema: tokenErrorSchema
+                        },
+                        404: {
+                            description: 'Not Found',
+                            schema: errorDataSchema
+                        },
+                        500: {
+                            description: 'Internal Server Error',
+                            schema: internalServerSchema
+                        }
+                    }
+                },
+            }
+        }
+    }
+];

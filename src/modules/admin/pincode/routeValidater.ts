@@ -37,3 +37,12 @@ export const listingSchema = Joi.object({
 export const validateByPincode = Joi.object({
     pincode: Joi.string().trim().regex(REGEX.ZIP_CODE).required().description('pincode')
 })
+
+export const validateByStateName = Joi.object({
+    stateName: Joi.string().trim().required().min(2).max(50).description('State Name')
+})
+
+export const validateByStateAndDistrict = Joi.object({
+    stateName: Joi.string().trim().required().min(2).max(50).description('State Name'),
+    districtName: Joi.string().trim().required().min(2).max(50).description('District Name')
+})

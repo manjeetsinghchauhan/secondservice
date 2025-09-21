@@ -1,0 +1,178 @@
+import { DB_MODEL_REF, STATUS } from "@config/main.constant";
+import { BaseDao } from "@modules/baseDao";
+import { toObjectId } from "@utils/appUtils";
+import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
+
+
+export class AdminPincodeDao extends BaseDao {
+    public pincodeDB: any = DB_MODEL_REF.PINCODE;
+
+    /**
+     * @description add data 
+     * @method add 
+     */
+    async add(params) { 
+        try {
+            await this.save(this.pincodeDB, params);
+        } catch (error) {
+            console.error("PincodeDao :: add", error);
+            throw error;
+
+        }
+    }
+
+    /**
+     * @description listing pincode data 
+     * @param params 
+     * @returns 
+     */
+    async listing(params) {
+        try {
+            let aggPipe: any = []
+            let match: any = {}
+            let sort: any = {};
+
+            if (params.search) {
+                match.$or = [
+                    { pincode: { "$regex": params.search, "$options": "i" } },
+                    { districtName: { "$regex": params.search, "$options": "i" } },
+                    { stateName: { "$regex": params.search, "$options": "i" } }
+                ];
+            }
+
+            aggPipe.push({ $match: match });
+
+            sort = { "districtName": 1 };
+            aggPipe.push({ "$sort": sort });
+
+            if (params.limit && params.pageNo) {
+                const [skipStage, limitStage] = this.addSkipLimit(
+                    params.limit,
+                    params.pageNo,
+                );
+                aggPipe.push(skipStage, limitStage);
+            }
+            console.log("aggPipe", aggPipe)
+            return await this.fastPaginate(this.pincodeDB, aggPipe, params.limit, params.pageNo, {}, true);
+
+        } catch (error) {
+            console.error("PincodeDao :: get", error);
+            throw error;
+
+        }
+    }
+
+    /**
+     * @description Search By pincode 
+     * @param params 
+     * @returns 
+     */
+    async searchByPincode(params) {
+        let query: any = {};
+        query.pincode = params.pincode;
+        return await this.find(this.pincodeDB, query, {}, {});
+    }
+
+    /**
+   * @function update
+   * @description function to update pincode details
+   * @returns array
+   */
+
+   async updateByPincode(params) {
+    try {
+        let query: any = {}
+        let update: any = {};
+        query._id = params.pincodeId;
+        delete params.pincodeId;
+        update["$set"] = params;
+        await this.updateOne(this.pincodeDB, query, update, {});
+
+    } catch (error) {
+        console.error("PincodeDao :: edit", error);
+        throw error;
+
+    }
+  }
+
+    /**
+     * @description Get districts by state name
+     * @param params 
+     * @returns array of unique districts
+     */
+    async getDistrictsByState(params) {
+        try {
+            const pipeline = [
+                {
+                    $match: {
+                        stateName: { $regex: new RegExp(`^${params.stateName.trim()}`, 'i') }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$districtName",
+                        districtName: { $first: "$districtName" },
+                        stateName: { $first: "$stateName" },
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        districtName: 1,
+                        stateName: 1,
+                        pincodeCount: "$count"
+                    }
+                },
+                {
+                    $sort: { districtName: 1 }
+                }
+            ];
+
+            return await this.aggregate(this.pincodeDB, pipeline, {});
+        } catch (error) {
+            console.error("PincodeDao :: getDistrictsByState", error);
+            throw error;
+        }
+    }
+
+    /**
+     * @description Get pincodes and office names by state name and district name
+     * @param params 
+     * @returns array of pincodes with office names
+     */
+    async getPincodesByStateAndDistrict(params) {
+        try {
+            const pipeline = [
+                {
+                    $match: {
+                        stateName: { $regex: new RegExp(`^${params.stateName.trim()}`, 'i') },
+                        districtName: { $regex: new RegExp(`^${params.districtName.trim()}`, 'i') }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        pincode: 1,
+                        officeName: 1,
+                        districtName: 1,
+                        stateName: 1,
+                        officeType: 1,
+                        deliveryStatus: 1
+                    }
+                },
+                {
+                    $sort: { pincode: 1 }
+                }
+            ];
+
+            return await this.aggregate(this.pincodeDB, pipeline, {});
+        } catch (error) {
+            console.error("PincodeDao :: getPincodesByStateAndDistrict", error);
+            throw error;
+        }
+    }
+}
+
+export const adminPincodeDao = new AdminPincodeDao();

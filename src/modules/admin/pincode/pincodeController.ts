@@ -55,5 +55,49 @@ class AdminPincodeController {
             throw error;
         }
     }
+
+    async getDistrictsByState(params, tokenData) {
+        try {
+            const result = await adminPincodeDao.getDistrictsByState(params);
+            if (!result || result.length === 0) {
+                return Promise.reject(PINCODE_MESSAGE.ERROR.DISTRICTS_NOT_FOUND);
+            }
+            return PINCODE_MESSAGE.SUCCESS.GET_DISTRICTS_BY_STATE(result);
+        } catch (error) {
+            console.error("PincodeController :: getDistrictsByState", error);
+            throw error;
+        }
+    }
+
+    async getPincodesByStateAndDistrict(params, tokenData) {
+        try {
+            const result = await adminPincodeDao.getPincodesByStateAndDistrict(params);
+            if (!result || result.length === 0) {
+                return Promise.reject(PINCODE_MESSAGE.ERROR.PINCODES_NOT_FOUND);
+            }
+            return PINCODE_MESSAGE.SUCCESS.GET_PINCODES_BY_STATE_AND_DISTRICT(result);
+        } catch (error) {
+            console.error("PincodeController :: getPincodesByStateAndDistrict", error);
+            throw error;
+        }
+    }
+
+    /**
+     * @function getAllStates
+     * @description Get all unique state names with statistics
+     * @returns object
+     */
+    async getAllStates(tokenData: any) {
+        try {
+            const result = await adminPincodeDao.getAllStates();
+            if (!result || result.length === 0) {
+                return Promise.reject(PINCODE_MESSAGE.ERROR.STATES_NOT_FOUND);
+            }
+            return PINCODE_MESSAGE.SUCCESS.GET_ALL_STATES(result);
+        } catch (error) {
+            console.error("PincodeController :: getAllStates", error);
+            throw error;
+        }
+    }
 }
 export const adminPincodeController = new AdminPincodeController();

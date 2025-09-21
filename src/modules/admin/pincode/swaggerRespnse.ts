@@ -30,4 +30,8 @@ export const internalServerSchema = Joi.object({
   message: Joi.string().optional()
 });
 
- 
+ export const notFoundSchema = Joi.object({
+  statusCode: Joi.number().integer().optional().example("404"),
+  type: Joi.string().optional().example("NOT_FOUND"),
+  message: Joi.string().optional()
+});

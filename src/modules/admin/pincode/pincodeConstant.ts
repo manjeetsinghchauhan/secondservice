@@ -5,8 +5,19 @@ export const PINCODE_MESSAGE = {
 		PINCODE_NOT_FOUND:{
 			"statusCode": HTTP_STATUS_CODE.BAD_REQUEST,
 			"type": "PINCODE_NOT_FOUND"
-		}
-	},
+		},
+		DISTRICTS_NOT_FOUND:{
+			"statusCode": HTTP_STATUS_CODE.URL_NOT_FOUND,
+			"type": "DISTRICTS_NOT_FOUND"
+		},
+		PINCODES_NOT_FOUND:{
+			"statusCode": HTTP_STATUS_CODE.URL_NOT_FOUND,
+			"type": "PINCODES_NOT_FOUND"
+		},
+		STATES_NOT_FOUND:{
+			"statusCode": HTTP_STATUS_CODE.URL_NOT_FOUND,
+			"type": "STATES_NOT_FOUND"
+		},	},
 	SUCCESS: {
 		// appSunc specific
 		ADD_CONTENT: {
@@ -27,5 +38,25 @@ export const PINCODE_MESSAGE = {
 				"data": data
 			}
 		},
-	}
+		GET_DISTRICTS_BY_STATE: (data)=>{
+			return{
+				"statusCode": HTTP_STATUS_CODE.OK,
+				"type": "GET_DISTRICTS_BY_STATE",
+				"data": data
+			}
+		},
+		GET_PINCODES_BY_STATE_AND_DISTRICT: (data)=>{
+			return{
+				"statusCode": HTTP_STATUS_CODE.OK,
+				"type": "GET_PINCODES_BY_STATE_AND_DISTRICT",
+				"data": data
+			}
+		},
+		GET_ALL_STATES: (data) => {
+			return {
+				"statusCode": HTTP_STATUS_CODE.OK,
+				"type": "GET_ALL_STATES",
+				"data": data
+			};
+		},	}
 };

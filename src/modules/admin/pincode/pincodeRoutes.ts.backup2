@@ -114,86 +114,6 @@ export const pincodesRoute = [
   },
   {
     method: "GET",
-    path: `${SERVER.API_BASE_URL}/admin/test-states`,
-    handler: async (request: any, h: ResponseToolkit) => {
-      return h.response({ message: "Test states route working" }).code(200);
-    },
-    options: {
-      tags: ["api", "test"],
-      description: "Test States Route",
-      auth: false
-    }
-  },
-  {
-    method: "GET",
-    path: `${SERVER.API_BASE_URL}/admin/states-list`,
-    handler: async (request: any, h: ResponseToolkit) => {
-      try {
-        const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await adminPincodeController.getAllStates(tokenData);
-        return responseHandler.sendSuccess(request, h, result);
-      } catch (error) {
-        return responseHandler.sendError(request, error);
-      }
-    },
-    options: {
-      tags: ["api", "pincodes"],
-      description: "Get All Unique State Names with Statistics",
-      auth: {
-        strategies: ["UserAuth"]
-      },
-      validate: {
-        headers: authorizationHeaderObj,
-        failAction: failActionFunction,
-      },
-      plugins: {
-        "hapi-swagger": {
-          responses: {
-            200: { description: 'Success', schema: sucessDataSchema },
-            400: { description: 'Bad Request', schema: errorSchema },
-            401: { description: 'Unauthorized', schema: tokenErrorSchema },
-            500: { description: 'Internal Server Error', schema: internalServerSchema }
-          },
-        }
-      }
-    }
-  },
-  {
-    method: "GET",
-    path: `${SERVER.API_BASE_URL}/admin/pincodes/states`,
-    handler: async (request: any, h: ResponseToolkit) => {
-      try {
-        const tokenData: TokenData = request.auth?.credentials?.tokenData;
-        const result = await adminPincodeController.getAllStates(tokenData);
-        return responseHandler.sendSuccess(request, h, result);
-      } catch (error) {
-        return responseHandler.sendError(request, error);
-      }
-    },
-    options: {
-      tags: ["api", "pincodes"],
-      description: "Get All Unique State Names with Statistics",
-      auth: {
-        strategies: ["UserAuth"]
-      },
-      validate: {
-        headers: authorizationHeaderObj,
-        failAction: failActionFunction,
-      },
-      plugins: {
-        "hapi-swagger": {
-          responses: {
-            200: { description: 'Success', schema: sucessDataSchema },
-            400: { description: 'Bad Request', schema: errorSchema },
-            401: { description: 'Unauthorized', schema: tokenErrorSchema },
-            500: { description: 'Internal Server Error', schema: internalServerSchema }
-          },
-        }
-      }
-    }
-  },
-  {
-    method: "GET",
     path: `${SERVER.API_BASE_URL}/admin/pincodes/{pincode}`,
     handler: async (request: any, h: ResponseToolkit) => {
       try {
@@ -396,4 +316,40 @@ export const pincodesRoute = [
       },
     }
   }
+  {
+      method: "GET",
+      path: `${SERVER.API_BASE_URL}/admin/pincodes/states`,
+      handler: async (request: any, h: ResponseToolkit) => {
+          try {
+              const tokenData: TokenData = request.auth?.credentials?.tokenData;
+              const result = await adminPincodeController.getAllStates(tokenData);
+              return responseHandler.sendSuccess(request, h, result);
+          } catch (error) {
+              return responseHandler.sendError(request, error);
+          }
+      },
+      options: {
+          tags: ["api", "pincodes"],
+          description: "Get All Unique State Names with Statistics",
+          auth: {
+              strategies: ["UserAuth"]
+          },
+          validate: {
+              headers: authorizationHeaderObj,
+              failAction: failActionFunction,
+          },
+          plugins: {
+              "hapi-swagger": {
+                  responses: {
+                      200: { description: 'Success', schema: sucessDataSchema,
+         notFoundSchema },
+                      400: { description: 'Bad Request', schema: errorSchema },
+                      401: { description: 'Unauthorized', schema: tokenErrorSchema },
+                      404: { description: 'Not Found', schema: notFoundSchema },
+                      500: { description: 'Internal Server Error', schema: internalServerSchema }
+                  },
+              }
+          }
+      }
+  },
 ]

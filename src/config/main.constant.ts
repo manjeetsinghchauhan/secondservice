@@ -67,7 +67,8 @@ const DB_MODEL_REF = {
 	ATTRIBUTE: "attributes",
 	PINCODE: "pincodes",
 	ADMIN: "admins",
-	SERVICE_TYPE: "service_types"
+	SERVICE_TYPE: "service_types",
+	SERVICE_LOCATION: "serviceLocations"
 };
 
 const DEVICE_TYPE = {

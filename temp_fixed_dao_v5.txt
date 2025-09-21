@@ -1,0 +1,59 @@
+    async getAllStates() {
+        try {
+            // First, get all unique state names with their counts
+            const pipeline = [
+                {
+                    $group: {
+                        _id: "$stateName",
+                        stateName: { "$first": "$stateName" },
+                        districtCount: { "$addToSet": "$districtName" },
+                        pincodeCount: { "$sum": 1 }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        stateName: 1,
+                        districtCount: { $size: "$districtCount" },
+                        pincodeCount: 1
+                    }
+                },
+                {
+                    $sort: { stateName: 1 }
+                }
+            ];
+
+            const result = await this.aggregate(this.pincodeDB, pipeline, { allowDiskUse: true });
+            
+            // Process the results to trim whitespace and merge duplicates
+            const processedStates = new Map();
+            
+            result.forEach(item => {
+                const trimmedStateName = item.stateName.trim();
+                
+                if (processedStates.has(trimmedStateName)) {
+                    // Merge with existing state
+                    const existing = processedStates.get(trimmedStateName);
+                    existing.pincodeCount += item.pincodeCount;
+                    // For district count, we need to get the actual district names and merge them
+                    // Since we can't easily merge district counts without the actual names,
+                    // we'll take the maximum district count as an approximation
+                    existing.districtCount = Math.max(existing.districtCount, item.districtCount);
+                } else {
+                    // Add new state
+                    processedStates.set(trimmedStateName, {
+                        stateName: trimmedStateName,
+                        districtCount: item.districtCount,
+                        pincodeCount: item.pincodeCount
+                    });
+                }
+            });
+            
+            // Convert map back to array and sort
+            return Array.from(processedStates.values()).sort((a, b) => a.stateName.localeCompare(b.stateName));
+            
+        } catch (error) {
+            console.error("PincodeDao :: getAllStates", error);
+            throw error;
+        }
+    }

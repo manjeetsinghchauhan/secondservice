@@ -16,7 +16,7 @@ import { pincodesRoute } from "@modules/admin/pincode";
 import { appCategoriesRoute } from "@modules/category";
 import { adminRoute } from "@modules/admin/admin";
 import { serviceTypeRoutes } from "@modules/admin/serviceType";
-
+import { serviceLocationRoutes } from "@modules/admin/serviceLocation";
 
 export const routes: any = [
 	...userRouteV1,
@@ -31,5 +31,6 @@ export const routes: any = [
 	...pincodesRoute,
 	...appCategoriesRoute,
 	...adminRoute,
-	...serviceTypeRoutes
+	...serviceTypeRoutes,
+	...serviceLocationRoutes
 ];
