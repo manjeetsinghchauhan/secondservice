@@ -1,18 +1,9 @@
-/**
- * Filename: serviceLocationDao.ts
- * Purpose: Data Access Object for serviceLocation operations
- * Owner: Secondservice
- * Maintainer: dothesmart
- */
-
-"use strict";
+import { BaseDao } from "@modules/baseDao";
 import { toObjectId } from "@utils/appUtils";
-import { BaseDao } from "../../baseDao/BaseDao";
-import { serviceLocations, IServiceLocation } from "./serviceLocationModel";
 import * as config from "@config/index";
 
 export class ServiceLocationDao extends BaseDao {
-    public serviceLocationDB: any = config.DB_MODEL_REF.SERVICE_LOCATION;
+    public serviceLocationDB: any = config.DB_MODEL_REF.SERVICE_LOCATION
 
     /**
      * @function createServiceLocation
@@ -21,7 +12,35 @@ export class ServiceLocationDao extends BaseDao {
      * @returns object
      */
     async createServiceLocation(params: any) {
-        return await this.save(this.serviceLocationDB, params);
+        try {
+            const serviceLocationData = {
+                serviceId: toObjectId(params.serviceId),
+                districtName: params.districtName,
+                stateName: params.stateName,
+                isEnabled: params.isEnabled,
+                isOverride: params.isOverride,
+                defaultPrice: params.defaultPrice,
+                salePrice: params.salePrice,
+                bundleBuying: params.bundleBuying,
+                bundleDiscount: params.bundleDiscount,
+                isSubscribable: params.isSubscribable,
+                subscriptionDiscount: params.subscriptionDiscount,
+                isRefundable: params.isRefundable,
+                refundPeriod: params.refundPeriod,
+                dealOfTheDay: params.dealOfTheDay,
+                dealOfTheDayDiscount: params.dealOfTheDayDiscount,
+                isPublished: params.isPublished,
+                isFeatured: params.isFeatured,
+                pincodes: params.pincodes,
+                lastModifiedBy: params.lastModifiedBy,
+                lastModifiedAt: new Date()
+            };
+
+            return await this.save(this.serviceLocationDB, serviceLocationData);
+        } catch (error) {
+            console.error("ServiceLocationDao :: createServiceLocation", error);
+            throw error;
+        }
     }
 
     /**
@@ -31,191 +50,73 @@ export class ServiceLocationDao extends BaseDao {
      * @returns object
      */
     async findServiceLocationByDistrict(params: any) {
-        const query = {
-            serviceId: toObjectId(params.serviceId),
-            districtName: params.districtName,
-            stateName: params.stateName
-        };
-        return await this.findOne(this.serviceLocationDB, query);
+        try {
+            const query = {
+                serviceId: toObjectId(params.serviceId),
+                districtName: { $regex: new RegExp(`^${params.districtName}$`, 'i') },
+                stateName: { $regex: new RegExp(`^${params.stateName}$`, 'i') }
+            };
+
+            return await this.findOne(this.serviceLocationDB, query);
+        } catch (error) {
+            console.error("ServiceLocationDao :: findServiceLocationByDistrict", error);
+            throw error;
+        }
     }
 
     /**
-     * @function findServiceLocationByPincode
-     * @description Find service location that contains a specific pincode
-     * @param params
-     * @returns object
-     */
-    async findServiceLocationByPincode(params: any) {
-        const query = {
-            serviceId: toObjectId(params.serviceId),
-            "pincodes.pincode": params.pincode,
-            isEnabled: true
-        };
-        return await this.findOne(this.serviceLocationDB, query);
-    }
-
-    /**
-     * @function updateServiceLocation
-     * @description Update service location configuration
+     * @function updateServiceLocationById
+     * @description Update service location by ID
      * @param params
      * @returns object
      */
     async updateServiceLocationById(params: any) {
-        const query = { _id: toObjectId(params.serviceLocationId) };
-        return await this.findOneAndUpdate(this.serviceLocationDB, query, params.updateData, { new: true });
-    }
-
-    async updateServiceLocation(params: any) {
-        const query = {
-            serviceId: toObjectId(params.serviceId),
-            districtName: params.districtName,
-            stateName: params.stateName
-        };
-        return await this.findOneAndUpdate(this.serviceLocationDB, query, params.updateData, { new: true });
+        try {
+            const { serviceLocationId, updateData } = params;
+            const query = { _id: toObjectId(serviceLocationId) };
+            
+            updateData.lastModifiedAt = new Date();
+            
+            return await this.updateOne(this.serviceLocationDB, query, updateData, {});
+        } catch (error) {
+            console.error("ServiceLocationDao :: updateServiceLocationById", error);
+            throw error;
+        }
     }
 
     /**
-     * @function addPincodeToDistrict
-     * @description Add a new pincode to existing district
-     * @param params
-     * @returns object
+     * Helper function to find category and subcategory names from categories table
      */
-    async addPincodeToDistrict(params: any) {
-        const query = {
-            serviceId: toObjectId(params.serviceId),
-            districtName: params.districtName,
-            stateName: params.stateName
-        };
-        const update = {
-            $push: {
-                pincodes: {
-                    pincode: params.pincode,
-                    officeName: params.officeName,
-                    isEnabled: params.isEnabled || true
+    private async findCategoryNames(subcategoryIds: string[]) {
+        let categoryName = null;
+        let subCategoryName = null;
+
+        if (!subcategoryIds || subcategoryIds.length === 0) {
+            return { categoryName, subCategoryName };
+        }
+
+        // Get the first subcategory ID
+        const subcategoryId = subcategoryIds[0];
+        
+        try {
+            // First, get the subcategory details
+            const subcategory = await this.findOne("categories", { _id: toObjectId(subcategoryId) }, {}, {});
+            
+            if (subcategory) {
+                subCategoryName = subcategory.title;
+                
+                // Then get the parent category
+                const parentCategory = await this.findOne("categories", { _id: toObjectId(subcategory.parentId) }, {}, {});
+                
+                if (parentCategory) {
+                    categoryName = parentCategory.title;
                 }
             }
-        };
-        return await this.findOneAndUpdate(this.serviceLocationDB, query, update, { new: true });
-    }
+        } catch (error) {
+            console.error("Error finding category names:", error);
+        }
 
-    /**
-     * @function updatePincodeStatus
-     * @description Update enable/disable status of a specific pincode
-     * @param params
-     * @returns object
-     */
-    async updatePincodeStatus(params: any) {
-        const query = {
-            serviceId: toObjectId(params.serviceId),
-            districtName: params.districtName,
-            stateName: params.stateName
-        };
-        const update = {
-            $set: {
-                "pincodes.$[elem].isEnabled": params.isEnabled
-            }
-        };
-        const options = {
-            arrayFilters: [{ "elem.pincode": params.pincode }],
-            new: true
-        };
-        return await this.findOneAndUpdate(this.serviceLocationDB, query, update, options);
-    }
-
-    /**
-     * @function getAllServiceLocations
-     * @description Get all service locations for a service
-     * @param params
-     * @returns array
-     */
-    async getAllServiceLocations(params: any) {
-        const query = {
-            serviceId: params.serviceId
-        };
-        return await this.find(this.serviceLocationDB, query, {});
-    }
-
-    /**
-     * @function getEnabledDistricts
-     * @description Get all enabled districts for a service
-     * @param params
-     * @returns array
-     */
-    async getEnabledDistricts(params: any) {
-        const query = {
-            serviceId: toObjectId(params.serviceId),
-            isEnabled: true
-        };
-        return await this.find(this.serviceLocationDB, query, {});
-    }
-
-    /**
-     * @function getServiceConfigurationForPincode
-     * @description Get complete service configuration for a specific pincode
-     * @param params
-     * @returns object
-     */
-    async getServiceConfigurationForPincode(params: any) {
-        const pipeline = [
-            {
-                $match: {
-                    serviceId: toObjectId(params.serviceId),
-                    "pincodes.pincode": params.pincode,
-                    isEnabled: true
-                }
-            },
-            {
-                $unwind: "$pincodes"
-            },
-            {
-                $match: {
-                    "pincodes.pincode": params.pincode,
-                    "pincodes.isEnabled": true
-                }
-            },
-            {
-                $project: {
-                    serviceId: 1,
-                    districtName: 1,
-                    stateName: 1,
-                    isEnabled: 1,
-                    isOverride: 1,
-                    defaultPrice: 1,
-                    salePrice: 1,
-                    bundleBuying: 1,
-                    bundleDiscount: 1,
-                    isSubscribable: 1,
-                    subscriptionDiscount: 1,
-                    isRefundable: 1,
-                    refundPeriod: 1,
-                    dealOfTheDay: 1,
-                    dealOfTheDayDiscount: 1,
-                    isPublished: 1,
-                    isFeatured: 1,
-                    pincode: "$pincodes.pincode",
-                    officeName: "$pincodes.officeName",
-                    pincodeEnabled: "$pincodes.isEnabled"
-                }
-            }
-        ];
-
-        const result = await this.aggregate(this.serviceLocationDB, pipeline, {});
-        return result[0] || null;
-    }
-
-    /**
-     * @function deleteServiceLocation
-     * @description Delete service location configuration
-     * @param params
-     * @returns object
-     */
-    async deleteServiceLocation(params: any) {
-        const query = {
-            serviceId: toObjectId(params.serviceId),
-            districtName: params.districtName,
-            stateName: params.stateName
-        };
-        return await this.findAndRemove(this.serviceLocationDB, query, {}, {});
+        return { categoryName, subCategoryName };
     }
 
     /**
@@ -269,31 +170,123 @@ export class ServiceLocationDao extends BaseDao {
                 }
             },
             {
+                $addFields: {
+                    // Conditional pricing based on isOverride
+                    finalDefaultPrice: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$defaultPrice",
+                            else: "$serviceData.defaultPrice"
+                        }
+                    },
+                    finalSalePrice: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$salePrice",
+                            else: "$serviceData.salePrice"
+                        }
+                    },
+                    finalBundleBuying: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$bundleBuying",
+                            else: "$serviceData.bundleBuying"
+                        }
+                    },
+                    finalBundleDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$bundleDiscount",
+                            else: "$serviceData.bundleDiscount"
+                        }
+                    },
+                    finalIsSubscribable: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isSubscribable",
+                            else: "$serviceData.isSubscribable"
+                        }
+                    },
+                    finalSubscriptionDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$subscriptionDiscount",
+                            else: "$serviceData.subscriptionDiscount"
+                        }
+                    },
+                    finalIsRefundable: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isRefundable",
+                            else: "$serviceData.isRefundable"
+                        }
+                    },
+                    finalRefundPeriod: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$refundPeriod",
+                            else: "$serviceData.refundPeriod"
+                        }
+                    },
+                    finalDealOfTheDay: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$dealOfTheDay",
+                            else: "$serviceData.dealOfTheDay"
+                        }
+                    },
+                    finalDealOfTheDayDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$dealOfTheDayDiscount",
+                            else: "$serviceData.dealOfTheDayDiscount"
+                        }
+                    },
+                    finalIsPublished: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isPublished",
+                            else: "$serviceData.isPublished"
+                        }
+                    },
+                    finalIsFeatured: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isFeatured",
+                            else: "$serviceData.isFeatured"
+                        }
+                    }
+                }
+            },
+            {
                 $project: {
                     serviceId: 1,
                     districtName: 1,
                     stateName: 1,
                     isEnabled: 1,
                     isOverride: 1,
-                    defaultPrice: 1,
-                    salePrice: 1,
-                    bundleBuying: 1,
-                    bundleDiscount: 1,
-                    isSubscribable: 1,
-                    subscriptionDiscount: 1,
-                    isRefundable: 1,
-                    refundPeriod: 1,
-                    dealOfTheDay: 1,
-                    dealOfTheDayDiscount: 1,
-                    isPublished: 1,
-                    isFeatured: 1,
+                    // Use conditional pricing fields
+                    defaultPrice: "$finalDefaultPrice",
+                    salePrice: "$finalSalePrice",
+                    bundleBuying: "$finalBundleBuying",
+                    bundleDiscount: "$finalBundleDiscount",
+                    isSubscribable: "$finalIsSubscribable",
+                    subscriptionDiscount: "$finalSubscriptionDiscount",
+                    isRefundable: "$finalIsRefundable",
+                    refundPeriod: "$finalRefundPeriod",
+                    dealOfTheDay: "$finalDealOfTheDay",
+                    dealOfTheDayDiscount: "$finalDealOfTheDayDiscount",
+                    isPublished: "$finalIsPublished",
+                    isFeatured: "$finalIsFeatured",
                     pincodes: 1,
                     lastModifiedBy: 1,
                     lastModifiedAt: 1,
                     createdAt: 1,
                     updatedAt: 1,
                     serviceName: "$serviceData.name",
-                    serviceStatus: "$serviceData.status"
+                    serviceStatus: "$serviceData.status",
+                    serviceType: "$serviceData.type",
+                    subcategoryIds: "$serviceData.category"
                 }
             },
             { $sort: { createdAt: -1 } },
@@ -304,8 +297,7 @@ export class ServiceLocationDao extends BaseDao {
                         { $limit: limitNum }
                     ],
                     pageInfo: [
-                        { $group: { _id: null, count: { $sum: 1 } } }
-                    ]
+                        { $group: { _id: null, count: { $sum: 1 } } }]
                 }
             }
         ];
@@ -318,6 +310,14 @@ export class ServiceLocationDao extends BaseDao {
         if (result[0] && result[0].edges) {
             serviceLocations = result[0].edges;
             totalCount = result[0].pageInfo[0] ? result[0].pageInfo[0].count : 0;
+        }
+
+        // Process each service location to add category names
+        for (let serviceLocation of serviceLocations) {
+            const { categoryName, subCategoryName } = await this.findCategoryNames(serviceLocation.subcategoryIds);
+            serviceLocation.categoryName = categoryName;
+            serviceLocation.subCategoryName = subCategoryName;
+            delete serviceLocation.subcategoryIds; // Remove the temporary field
         }
 
         return {
@@ -358,31 +358,123 @@ export class ServiceLocationDao extends BaseDao {
                 }
             },
             {
+                $addFields: {
+                    // Conditional pricing based on isOverride
+                    finalDefaultPrice: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$defaultPrice",
+                            else: "$serviceData.defaultPrice"
+                        }
+                    },
+                    finalSalePrice: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$salePrice",
+                            else: "$serviceData.salePrice"
+                        }
+                    },
+                    finalBundleBuying: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$bundleBuying",
+                            else: "$serviceData.bundleBuying"
+                        }
+                    },
+                    finalBundleDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$bundleDiscount",
+                            else: "$serviceData.bundleDiscount"
+                        }
+                    },
+                    finalIsSubscribable: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isSubscribable",
+                            else: "$serviceData.isSubscribable"
+                        }
+                    },
+                    finalSubscriptionDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$subscriptionDiscount",
+                            else: "$serviceData.subscriptionDiscount"
+                        }
+                    },
+                    finalIsRefundable: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isRefundable",
+                            else: "$serviceData.isRefundable"
+                        }
+                    },
+                    finalRefundPeriod: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$refundPeriod",
+                            else: "$serviceData.refundPeriod"
+                        }
+                    },
+                    finalDealOfTheDay: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$dealOfTheDay",
+                            else: "$serviceData.dealOfTheDay"
+                        }
+                    },
+                    finalDealOfTheDayDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$dealOfTheDayDiscount",
+                            else: "$serviceData.dealOfTheDayDiscount"
+                        }
+                    },
+                    finalIsPublished: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isPublished",
+                            else: "$serviceData.isPublished"
+                        }
+                    },
+                    finalIsFeatured: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isFeatured",
+                            else: "$serviceData.isFeatured"
+                        }
+                    }
+                }
+            },
+            {
                 $project: {
                     serviceId: 1,
                     districtName: 1,
                     stateName: 1,
                     isEnabled: 1,
                     isOverride: 1,
-                    defaultPrice: 1,
-                    salePrice: 1,
-                    bundleBuying: 1,
-                    bundleDiscount: 1,
-                    isSubscribable: 1,
-                    subscriptionDiscount: 1,
-                    isRefundable: 1,
-                    refundPeriod: 1,
-                    dealOfTheDay: 1,
-                    dealOfTheDayDiscount: 1,
-                    isPublished: 1,
-                    isFeatured: 1,
+                    // Use conditional pricing fields
+                    defaultPrice: "$finalDefaultPrice",
+                    salePrice: "$finalSalePrice",
+                    bundleBuying: "$finalBundleBuying",
+                    bundleDiscount: "$finalBundleDiscount",
+                    isSubscribable: "$finalIsSubscribable",
+                    subscriptionDiscount: "$finalSubscriptionDiscount",
+                    isRefundable: "$finalIsRefundable",
+                    refundPeriod: "$finalRefundPeriod",
+                    dealOfTheDay: "$finalDealOfTheDay",
+                    dealOfTheDayDiscount: "$finalDealOfTheDayDiscount",
+                    isPublished: "$finalIsPublished",
+                    isFeatured: "$finalIsFeatured",
                     pincodes: 1,
                     lastModifiedBy: 1,
                     lastModifiedAt: 1,
                     createdAt: 1,
                     updatedAt: 1,
                     serviceName: "$serviceData.name",
-                    serviceStatus: "$serviceData.status"
+                    serviceStatus: "$serviceData.status",
+                    serviceType: "$serviceData.type",
+                    subcategoryIds: "$serviceData.category"
                 }
             },
             { $sort: { createdAt: -1 } },
@@ -393,8 +485,7 @@ export class ServiceLocationDao extends BaseDao {
                         { $limit: limitNum }
                     ],
                     pageInfo: [
-                        { $group: { _id: null, count: { $sum: 1 } } }
-                    ]
+                        { $group: { _id: null, count: { $sum: 1 } } }]
                 }
             }
         ];
@@ -407,6 +498,14 @@ export class ServiceLocationDao extends BaseDao {
         if (result[0] && result[0].edges) {
             serviceLocations = result[0].edges;
             totalCount = result[0].pageInfo[0] ? result[0].pageInfo[0].count : 0;
+        }
+
+        // Process each service location to add category names
+        for (let serviceLocation of serviceLocations) {
+            const { categoryName, subCategoryName } = await this.findCategoryNames(serviceLocation.subcategoryIds);
+            serviceLocation.categoryName = categoryName;
+            serviceLocation.subCategoryName = subCategoryName;
+            delete serviceLocation.subcategoryIds; // Remove the temporary field
         }
 
         return {
@@ -450,31 +549,123 @@ export class ServiceLocationDao extends BaseDao {
                 }
             },
             {
+                $addFields: {
+                    // Conditional pricing based on isOverride
+                    finalDefaultPrice: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$defaultPrice",
+                            else: "$serviceData.defaultPrice"
+                        }
+                    },
+                    finalSalePrice: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$salePrice",
+                            else: "$serviceData.salePrice"
+                        }
+                    },
+                    finalBundleBuying: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$bundleBuying",
+                            else: "$serviceData.bundleBuying"
+                        }
+                    },
+                    finalBundleDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$bundleDiscount",
+                            else: "$serviceData.bundleDiscount"
+                        }
+                    },
+                    finalIsSubscribable: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isSubscribable",
+                            else: "$serviceData.isSubscribable"
+                        }
+                    },
+                    finalSubscriptionDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$subscriptionDiscount",
+                            else: "$serviceData.subscriptionDiscount"
+                        }
+                    },
+                    finalIsRefundable: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isRefundable",
+                            else: "$serviceData.isRefundable"
+                        }
+                    },
+                    finalRefundPeriod: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$refundPeriod",
+                            else: "$serviceData.refundPeriod"
+                        }
+                    },
+                    finalDealOfTheDay: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$dealOfTheDay",
+                            else: "$serviceData.dealOfTheDay"
+                        }
+                    },
+                    finalDealOfTheDayDiscount: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$dealOfTheDayDiscount",
+                            else: "$serviceData.dealOfTheDayDiscount"
+                        }
+                    },
+                    finalIsPublished: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isPublished",
+                            else: "$serviceData.isPublished"
+                        }
+                    },
+                    finalIsFeatured: {
+                        $cond: {
+                            if: "$isOverride",
+                            then: "$isFeatured",
+                            else: "$serviceData.isFeatured"
+                        }
+                    }
+                }
+            },
+            {
                 $project: {
                     serviceId: 1,
                     districtName: 1,
                     stateName: 1,
                     isEnabled: 1,
                     isOverride: 1,
-                    defaultPrice: 1,
-                    salePrice: 1,
-                    bundleBuying: 1,
-                    bundleDiscount: 1,
-                    isSubscribable: 1,
-                    subscriptionDiscount: 1,
-                    isRefundable: 1,
-                    refundPeriod: 1,
-                    dealOfTheDay: 1,
-                    dealOfTheDayDiscount: 1,
-                    isPublished: 1,
-                    isFeatured: 1,
+                    // Use conditional pricing fields
+                    defaultPrice: "$finalDefaultPrice",
+                    salePrice: "$finalSalePrice",
+                    bundleBuying: "$finalBundleBuying",
+                    bundleDiscount: "$finalBundleDiscount",
+                    isSubscribable: "$finalIsSubscribable",
+                    subscriptionDiscount: "$finalSubscriptionDiscount",
+                    isRefundable: "$finalIsRefundable",
+                    refundPeriod: "$finalRefundPeriod",
+                    dealOfTheDay: "$finalDealOfTheDay",
+                    dealOfTheDayDiscount: "$finalDealOfTheDayDiscount",
+                    isPublished: "$finalIsPublished",
+                    isFeatured: "$finalIsFeatured",
                     pincodes: 1,
                     lastModifiedBy: 1,
                     lastModifiedAt: 1,
                     createdAt: 1,
                     updatedAt: 1,
                     serviceName: "$serviceData.name",
-                    serviceStatus: "$serviceData.status"
+                    serviceStatus: "$serviceData.status",
+                    serviceType: "$serviceData.type",
+                    subcategoryIds: "$serviceData.category"
                 }
             },
             { $sort: { createdAt: -1 } },
@@ -485,8 +676,7 @@ export class ServiceLocationDao extends BaseDao {
                         { $limit: limitNum }
                     ],
                     pageInfo: [
-                        { $group: { _id: null, count: { $sum: 1 } } }
-                    ]
+                        { $group: { _id: null, count: { $sum: 1 } } }]
                 }
             }
         ];
@@ -499,6 +689,14 @@ export class ServiceLocationDao extends BaseDao {
         if (result[0] && result[0].edges) {
             serviceLocations = result[0].edges;
             totalCount = result[0].pageInfo[0] ? result[0].pageInfo[0].count : 0;
+        }
+
+        // Process each service location to add category names
+        for (let serviceLocation of serviceLocations) {
+            const { categoryName, subCategoryName } = await this.findCategoryNames(serviceLocation.subcategoryIds);
+            serviceLocation.categoryName = categoryName;
+            serviceLocation.subCategoryName = subCategoryName;
+            delete serviceLocation.subcategoryIds; // Remove the temporary field
         }
 
         return {
