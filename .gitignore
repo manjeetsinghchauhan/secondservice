@@ -8,3 +8,8 @@ yarn.lock
 yarn-error.log
 package-lock.json
 /.vscode
+/src/config/local.env
+
+/dist
+/dist/*
+/src/modules/admin/pincode/data/pincodes.csv
